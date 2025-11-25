@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { memo } from 'react';
 import {
   Area,
@@ -120,8 +121,16 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
   };
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      {renderChart()}
-    </ResponsiveContainer>
+    <motion.div
+      key={`${type}-${data.length}`}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <ResponsiveContainer width="100%" height="100%">
+        {renderChart()}
+      </ResponsiveContainer>
+    </motion.div>
   );
 });

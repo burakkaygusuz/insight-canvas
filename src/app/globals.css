@@ -41,6 +41,18 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-tooltip: 8px;
+
+  /* Chart color palette - Recharts usage */
+  --color-chart-indigo: #6366f1;
+  --color-chart-violet: #8b5cf6;
+  --color-chart-pink: #ec4899;
+  --color-chart-rose: #f43f5e;
+  --color-chart-orange: #f97316;
+  --color-chart-yellow: #eab308;
+  --color-chart-green: #22c55e;
+  --color-chart-cyan: #06b6d4;
+  --color-chart-blue: #3b82f6;
 }
 
 :root {

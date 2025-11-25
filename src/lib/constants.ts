@@ -130,3 +130,24 @@ Dataset Schema:
 - profit: number (Profit in USD)
 - customers: number (Count of customers)
 `;
+
+export const CHART_COLORS = [
+  'var(--color-chart-indigo)',
+  'var(--color-chart-violet)',
+  'var(--color-chart-pink)',
+  'var(--color-chart-rose)',
+  'var(--color-chart-orange)',
+  'var(--color-chart-yellow)',
+  'var(--color-chart-green)',
+  'var(--color-chart-cyan)',
+  'var(--color-chart-blue)'
+] as const;
+
+export const TOOLTIP_STYLE = {
+  contentStyle: {
+    backgroundColor: 'var(--background)',
+    borderColor: 'var(--border)',
+    borderRadius: 'var(--radius-tooltip)'
+  },
+  itemStyle: { color: 'var(--foreground)' }
+} as const;

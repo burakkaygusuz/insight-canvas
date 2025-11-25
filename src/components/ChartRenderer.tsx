@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import {
   Area,
   AreaChart,
@@ -18,25 +19,14 @@ import {
   YAxis
 } from 'recharts';
 
+import { CHART_COLORS, TOOLTIP_STYLE } from '@/lib/constants';
 import { GeneratedChart } from '@/types/chart';
 
 interface ChartRendererProps {
   chart: GeneratedChart;
 }
 
-const COLORS = [
-  '#6366f1',
-  '#8b5cf6',
-  '#ec4899',
-  '#f43f5e',
-  '#f97316',
-  '#eab308',
-  '#22c55e',
-  '#06b6d4',
-  '#3b82f6'
-];
-
-export function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
+export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
   const { type, data, xAxisKey, dataKey } = chart;
 
   const renderChart = () => {
@@ -50,14 +40,7 @@ export function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
             />
             <XAxis dataKey={xAxisKey} className="text-xs text-slate-500" />
             <YAxis className="text-xs text-slate-500" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--background)',
-                borderColor: 'var(--border)',
-                borderRadius: '8px'
-              }}
-              itemStyle={{ color: 'var(--foreground)' }}
-            />
+            <Tooltip {...TOOLTIP_STYLE} />
             <Legend />
             <Bar dataKey={dataKey} fill="#6366f1" radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -71,14 +54,7 @@ export function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
             />
             <XAxis dataKey={xAxisKey} className="text-xs text-slate-500" />
             <YAxis className="text-xs text-slate-500" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--background)',
-                borderColor: 'var(--border)',
-                borderRadius: '8px'
-              }}
-              itemStyle={{ color: 'var(--foreground)' }}
-            />
+            <Tooltip {...TOOLTIP_STYLE} />
             <Legend />
             <Line
               type="monotone"
@@ -99,14 +75,7 @@ export function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
             />
             <XAxis dataKey={xAxisKey} className="text-xs text-slate-500" />
             <YAxis className="text-xs text-slate-500" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--background)',
-                borderColor: 'var(--border)',
-                borderRadius: '8px'
-              }}
-              itemStyle={{ color: 'var(--foreground)' }}
-            />
+            <Tooltip {...TOOLTIP_STYLE} />
             <Legend />
             <Area
               type="monotone"
@@ -133,18 +102,11 @@ export function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${String(entry[xAxisKey] ?? index)}`}
-                  fill={COLORS[index % COLORS.length]}
+                  fill={CHART_COLORS[index % CHART_COLORS.length]}
                 />
               ))}
             </Pie>
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--background)',
-                borderColor: 'var(--border)',
-                borderRadius: '8px'
-              }}
-              itemStyle={{ color: 'var(--foreground)' }}
-            />
+            <Tooltip {...TOOLTIP_STYLE} />
             <Legend />
           </PieChart>
         );
@@ -162,4 +124,4 @@ export function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
       {renderChart()}
     </ResponsiveContainer>
   );
-}
+});

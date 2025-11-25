@@ -1,7 +1,7 @@
 'use client';
 
 import { Copy, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 
 import { ChartRenderer } from '@/components/ChartRenderer';
 import { Button } from '@/components/ui/Button';
@@ -13,14 +13,14 @@ interface ChartCardProps {
   onDelete: () => void;
 }
 
-export function ChartCard({ chart, onDelete }: Readonly<ChartCardProps>) {
+export const ChartCard = memo(function ChartCard({ chart, onDelete }: Readonly<ChartCardProps>) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopyEmbed = () => {
+  const handleCopyEmbed = useCallback(() => {
     navigator.clipboard.writeText(JSON.stringify(chart, null, 2));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
+  }, [chart]);
 
   return (
     <Card className="flex h-[400px] w-full flex-col border-slate-200 transition-shadow duration-300 hover:shadow-lg dark:border-slate-800">
@@ -55,4 +55,4 @@ export function ChartCard({ chart, onDelete }: Readonly<ChartCardProps>) {
       </CardContent>
     </Card>
   );
-}
+});

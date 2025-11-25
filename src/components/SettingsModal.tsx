@@ -1,7 +1,7 @@
 'use client';
 
 import { Settings } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import {
@@ -22,7 +22,10 @@ interface SettingsModalProps {
   onSave: (config: OllamaConfig) => void;
 }
 
-export function SettingsModal({ config, onSave }: Readonly<SettingsModalProps>) {
+export const SettingsModal = memo(function SettingsModal({
+  config,
+  onSave
+}: Readonly<SettingsModalProps>) {
   const [baseUrl, setBaseUrl] = useState(config.baseUrl);
   const [model, setModel] = useState(config.model);
   const [open, setOpen] = useState(false);
@@ -32,10 +35,15 @@ export function SettingsModal({ config, onSave }: Readonly<SettingsModalProps>) 
     setModel(config.model);
   }, [config]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     onSave({ baseUrl, model });
     setOpen(false);
-  };
+  }, [baseUrl, model, onSave]);
+
+  const hasChanges = useMemo(
+    () => baseUrl !== config.baseUrl || model !== config.model,
+    [baseUrl, model, config]
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -79,11 +87,11 @@ export function SettingsModal({ config, onSave }: Readonly<SettingsModalProps>) 
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" onClick={handleSave}>
+          <Button type="submit" onClick={handleSave} disabled={!hasChanges}>
             Save changes
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+});

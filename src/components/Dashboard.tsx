@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState, useTransition } from 'react';
 
 import { ChartCard } from '@/components/ChartCard';
 import { SettingsModal } from '@/components/SettingsModal';
@@ -17,45 +17,47 @@ interface DashboardProps {
 
 export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardProps>) {
   const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
   const [charts, setCharts] = useState<GeneratedChart[]>([]);
   const [config, setConfig] = useState<OllamaConfig>({
     baseUrl: 'http://localhost:11434',
     model: 'llama3'
   });
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!query.trim()) return;
 
-    setLoading(true);
     setError(null);
 
-    try {
-      const chart = await generateChartFromPrompt(query, config, systemPromptTemplate);
-      const chartWithId = { ...chart, id: crypto.randomUUID() };
-      setCharts((prev) => [chartWithId, ...prev]);
-      setQuery('');
-    } catch (err) {
-      console.error(err);
-      setError(
-        'Failed to generate chart. Please ensure Ollama is running and CORS is configured (OLLAMA_ORIGINS="*").'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    startTransition(async () => {
+      try {
+        const chart = await generateChartFromPrompt(query, config, systemPromptTemplate);
+        const chartWithId = { ...chart, id: crypto.randomUUID() };
+        setCharts((prev) => [chartWithId, ...prev]);
+        setQuery('');
+      } catch (err) {
+        console.error(err);
+        setError(
+          'Failed to generate chart. Please ensure Ollama is running and CORS is configured (OLLAMA_ORIGINS="*").'
+        );
+      }
+    });
+  }, [query, config, systemPromptTemplate]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     setCharts((prev) => prev.filter((c) => c.id !== id));
-  };
+  }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleGenerate();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleGenerate();
+      }
+    },
+    [handleGenerate]
+  );
 
   return (
     <main className="min-h-screen bg-slate-50 transition-colors duration-300 dark:bg-slate-950">
@@ -98,15 +100,15 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
                 onKeyDown={handleKeyDown}
                 placeholder="e.g., Show me sales trends over time..."
                 className="h-12 flex-1 border-0 bg-transparent text-lg focus-visible:ring-0"
-                disabled={loading}
+                disabled={isPending}
               />
               <Button
                 onClick={handleGenerate}
-                disabled={loading || !query.trim()}
+                disabled={isPending || !query.trim()}
                 size="lg"
                 className="bg-indigo-600 text-white shadow-md transition-all hover:scale-105 hover:bg-indigo-700"
               >
-                {loading ? (
+                {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Generating...
@@ -142,7 +144,7 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
               </div>
               <p className="text-lg font-medium">No charts generated yet</p>
               <p className="text-sm">
-                Try asking: "Compare sales between North America and Europe"
+                Try asking: &ldquo;Compare sales between North America and Europe&rdquo;
               </p>
             </div>
           </div>

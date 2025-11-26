@@ -1,8 +1,8 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Settings } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Settings } from 'lucide-react';
+import { memo, useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/Dialog';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
+import { OllamaConfigSchema, safeValidate } from '@/lib/validation';
 import { OllamaConfig } from '@/types/ollama';
 
 interface SettingsModalProps {
@@ -30,14 +31,30 @@ export const SettingsModal = memo(function SettingsModal({
   const [baseUrl, setBaseUrl] = useState(config.baseUrl);
   const [model, setModel] = useState(config.model);
   const [open, setOpen] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setBaseUrl(config.baseUrl);
-    setModel(config.model);
-  }, [config]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      setOpen(newOpen);
+      if (newOpen) {
+        setBaseUrl(config.baseUrl);
+        setModel(config.model);
+        setValidationError(null);
+      }
+    },
+    [config.baseUrl, config.model]
+  );
 
   const handleSave = useCallback(() => {
-    onSave({ baseUrl, model });
+    const validation = safeValidate(OllamaConfigSchema, { baseUrl, model });
+
+    if (!validation.success) {
+      setValidationError(validation.error);
+      return;
+    }
+
+    setValidationError(null);
+    onSave(validation.data);
     setOpen(false);
   }, [baseUrl, model, onSave]);
 
@@ -46,8 +63,18 @@ export const SettingsModal = memo(function SettingsModal({
     [baseUrl, model, config]
   );
 
+  const handleBaseUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setBaseUrl(e.target.value);
+    setValidationError(null);
+  }, []);
+
+  const handleModelChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setModel(e.target.value);
+    setValidationError(null);
+  }, []);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <motion.div whileHover={{ scale: 1.05, rotate: 90 }} whileTap={{ scale: 0.95 }}>
           <Button variant="outline" size="icon" className="rounded-full">
@@ -90,7 +117,7 @@ export const SettingsModal = memo(function SettingsModal({
                 <Input
                   id="baseUrl"
                   value={baseUrl}
-                  onChange={(e) => setBaseUrl(e.target.value)}
+                  onChange={handleBaseUrlChange}
                   className="col-span-3"
                   placeholder="http://localhost:11434"
                 />
@@ -107,12 +134,23 @@ export const SettingsModal = memo(function SettingsModal({
                 <Input
                   id="model"
                   value={model}
-                  onChange={(e) => setModel(e.target.value)}
+                  onChange={handleModelChange}
                   className="col-span-3"
                   placeholder="llama3"
                 />
               </motion.div>
             </motion.div>
+            {validationError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p className="flex-1">{validationError}</p>
+              </motion.div>
+            )}
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

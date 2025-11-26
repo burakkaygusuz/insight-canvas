@@ -41,10 +41,21 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
         setQuery('');
         setShowSuccess(true);
       } catch (err) {
-        console.error(err);
-        setError(
-          'Failed to generate chart. Please ensure Ollama is running and CORS is configured (OLLAMA_ORIGINS="*").'
-        );
+        console.error('Chart generation error:', err);
+
+        if (err instanceof Error) {
+          if (err.message.includes('404') || err.message.includes('not found')) {
+            setError(
+              `Model "${config.model}" not found. Please check the model name in settings or pull it using: ollama pull ${config.model}`
+            );
+          } else {
+            setError(err.message);
+          }
+        } else {
+          setError(
+            'Failed to generate chart. Please ensure Ollama is running and CORS is configured (OLLAMA_ORIGINS="*").'
+          );
+        }
       }
     });
   }, [query, config, systemPromptTemplate]);
@@ -88,7 +99,6 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
 
   return (
     <main className="min-h-screen bg-slate-50 transition-colors duration-300 dark:bg-slate-950">
-      {/* Header / Hero */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
@@ -104,7 +114,6 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
       </header>
 
       <div className="container mx-auto max-w-6xl px-4 py-12">
-        {/* Hero Text */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -131,7 +140,6 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
           </motion.p>
         </motion.div>
 
-        {/* Input Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -186,7 +194,6 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
             </div>
           </form>
 
-          {/* Keyboard Hint */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -205,7 +212,6 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
             to clear
           </motion.p>
 
-          {/* Success Message */}
           <AnimatePresence mode="wait">
             {showSuccess && !error && (
               <motion.div
@@ -227,7 +233,6 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
             )}
           </AnimatePresence>
 
-          {/* Error Message */}
           <AnimatePresence mode="wait">
             {error && (
               <motion.div
@@ -269,7 +274,6 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
           </AnimatePresence>
         </motion.div>
 
-        {/* Charts Grid */}
         <AnimatePresence mode="popLayout">
           {charts.length > 0 ? (
             <motion.div

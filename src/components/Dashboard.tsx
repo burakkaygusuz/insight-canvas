@@ -115,24 +115,21 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
 
       <div className="container mx-auto max-w-6xl px-4 py-12">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
           className="mb-12 space-y-4 text-center"
         >
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
             className="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl dark:text-slate-50"
           >
             Visualize your data with{' '}
             <span className="text-indigo-600 dark:text-indigo-400">AI</span>
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
             className="mx-auto max-w-2xl text-lg text-slate-600 dark:text-slate-400"
           >
             Ask questions about your sales, profit, and customer data. InsightCanvas uses your local
@@ -141,14 +138,13 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
           className="relative mx-auto mb-16 max-w-2xl"
         >
           <form onSubmit={handleSubmit} className="group relative">
             <div className="absolute -inset-1 rounded-xl bg-linear-to-r from-indigo-500 to-violet-500 opacity-25 blur transition duration-1000 group-hover:opacity-50 group-hover:duration-200"></div>
-            <div className="relative flex gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="relative flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
               <div className="relative flex-1">
                 <Input
                   value={query}
@@ -176,17 +172,16 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
               <Button
                 type="submit"
                 disabled={isPending || !query.trim()}
-                size="lg"
-                className="bg-indigo-600 text-white shadow-md transition-all hover:scale-105 hover:bg-indigo-700 disabled:hover:scale-100"
+                className="h-12 shrink-0 bg-indigo-600 px-6 text-white shadow-md transition-all hover:scale-105 hover:bg-indigo-700 disabled:hover:scale-100"
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="h-5 w-5 animate-spin md:mr-2" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                     <span className="hidden md:inline">Generating...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-5 w-5 md:mr-2" />
+                    <Sparkles className="h-5 w-5" />
                     <span className="hidden md:inline">Generate</span>
                   </>
                 )}
@@ -195,9 +190,8 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
           </form>
 
           <motion.p
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.5 }}
             id="query-hint"
             className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400"
           >

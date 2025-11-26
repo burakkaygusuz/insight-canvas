@@ -1,6 +1,8 @@
 import js from '@eslint/js';
 import nextVitals from 'eslint-config-next/core-web-vitals';
-import prettier from 'eslint-config-prettier/flat';
+import nextTypescript from 'eslint-config-next/typescript';
+import prettierConfig from 'eslint-config-prettier/flat';
+import prettierPlugin from 'eslint-plugin-prettier/recommended';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
@@ -11,5 +13,7 @@ export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...nextVitals,
-  prettier
+  ...nextTypescript,
+  prettierPlugin,
+  prettierConfig
 ]);

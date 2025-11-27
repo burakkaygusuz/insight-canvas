@@ -37,13 +37,29 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
           <BarChart data={data}>
             <CartesianGrid
               strokeDasharray="3 3"
-              className="stroke-slate-200 dark:stroke-slate-700"
+              vertical={false}
+              className="stroke-slate-100 dark:stroke-slate-800"
             />
-            <XAxis dataKey={xAxisKey} className="text-xs text-slate-500" />
-            <YAxis className="text-xs text-slate-500" />
-            <Tooltip {...TOOLTIP_STYLE} />
-            <Legend />
-            <Bar dataKey={dataKey} fill="#6366f1" radius={[4, 4, 0, 0]} />
+            <XAxis
+              dataKey={xAxisKey}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 12 }}
+              dy={10}
+            />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--background)',
+                borderColor: 'var(--border)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                fontSize: '12px'
+              }}
+              cursor={{ fill: '#f1f5f9', opacity: 0.5 }}
+            />
+            <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
+            <Bar dataKey={dataKey} fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={60} />
           </BarChart>
         );
       case 'LINE':
@@ -51,19 +67,34 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
           <LineChart data={data}>
             <CartesianGrid
               strokeDasharray="3 3"
-              className="stroke-slate-200 dark:stroke-slate-700"
+              vertical={false}
+              className="stroke-slate-100 dark:stroke-slate-800"
             />
-            <XAxis dataKey={xAxisKey} className="text-xs text-slate-500" />
-            <YAxis className="text-xs text-slate-500" />
-            <Tooltip {...TOOLTIP_STYLE} />
-            <Legend />
+            <XAxis
+              dataKey={xAxisKey}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 12 }}
+              dy={10}
+            />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--background)',
+                borderColor: 'var(--border)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                fontSize: '12px'
+              }}
+            />
+            <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
             <Line
               type="monotone"
               dataKey={dataKey}
               stroke="#6366f1"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
+              strokeWidth={3}
+              dot={{ r: 4, fill: '#fff', strokeWidth: 2 }}
+              activeDot={{ r: 6, strokeWidth: 0 }}
             />
           </LineChart>
         );
@@ -72,18 +103,34 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
           <AreaChart data={data}>
             <CartesianGrid
               strokeDasharray="3 3"
-              className="stroke-slate-200 dark:stroke-slate-700"
+              vertical={false}
+              className="stroke-slate-100 dark:stroke-slate-800"
             />
-            <XAxis dataKey={xAxisKey} className="text-xs text-slate-500" />
-            <YAxis className="text-xs text-slate-500" />
-            <Tooltip {...TOOLTIP_STYLE} />
-            <Legend />
+            <XAxis
+              dataKey={xAxisKey}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 12 }}
+              dy={10}
+            />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--background)',
+                borderColor: 'var(--border)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                fontSize: '12px'
+              }}
+            />
+            <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
             <Area
               type="monotone"
               dataKey={dataKey}
               stroke="#6366f1"
               fill="#6366f1"
               fillOpacity={0.2}
+              strokeWidth={2}
             />
           </AreaChart>
         );

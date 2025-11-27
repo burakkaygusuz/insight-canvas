@@ -151,3 +151,23 @@ export const TOOLTIP_STYLE = {
   },
   itemStyle: { color: 'var(--foreground)' }
 } as const;
+
+import { AiProvider } from '@/types/ai';
+
+export const DEFAULT_MODELS = {
+  [AiProvider.GOOGLE]: 'gemini-2.5-flash',
+  [AiProvider.OPENAI]: 'gpt-4o',
+  [AiProvider.OPENAI_COMPATIBLE]: 'llama-3.1-70b'
+};
+
+export const POPULAR_MODELS = {
+  [AiProvider.GOOGLE]: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'],
+  [AiProvider.OPENAI]: ['gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo'],
+  [AiProvider.OPENAI_COMPATIBLE]: ['llama-3.1-70b', 'mixtral-8x7b', 'qwen-2.5-72b']
+};
+
+export const PROVIDER_LABELS = {
+  [AiProvider.GOOGLE]: 'Google Gemini',
+  [AiProvider.OPENAI]: 'OpenAI',
+  [AiProvider.OPENAI_COMPATIBLE]: 'OpenAI Compatible'
+};

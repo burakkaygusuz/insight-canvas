@@ -6,9 +6,9 @@ import { useCallback, useEffect, useState, useTransition } from 'react';
 
 import { ChartCard } from '@/components/ChartCard';
 import { SettingsModal } from '@/components/SettingsModal';
-import { generateChartFromPrompt } from '@/services/ollamaService';
-import { GeneratedChart } from '@/types/chart';
-import { OllamaConfig } from '@/types/ollama';
+import { DEFAULT_MODELS } from '@/lib/constants';
+import { generateChartFromPrompt } from '@/services/aiService';
+import { AiProvider, ApiConfig, GeneratedChart } from '@/types/ai';
 
 interface DashboardProps {
   systemPromptTemplate: string;
@@ -17,9 +17,11 @@ interface DashboardProps {
 export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardProps>) {
   const [query, setQuery] = useState('');
   const [charts, setCharts] = useState<GeneratedChart[]>([]);
-  const [config, setConfig] = useState<OllamaConfig>({
-    baseUrl: 'http://localhost:11434',
-    model: 'llama3'
+  const [config, setConfig] = useState<ApiConfig>({
+    provider: AiProvider.GOOGLE,
+    model: DEFAULT_MODELS[AiProvider.GOOGLE],
+    apiKey: '',
+    baseUrl: ''
   });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -42,17 +44,9 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
         console.error('Chart generation error:', err);
 
         if (err instanceof Error) {
-          if (err.message.includes('404') || err.message.includes('not found')) {
-            setError(
-              `Model "${config.model}" not found. Please check the model name in settings or pull it using: ollama pull ${config.model}`
-            );
-          } else {
-            setError(err.message);
-          }
+          setError(err.message);
         } else {
-          setError(
-            'Failed to generate chart. Please ensure Ollama is running and CORS is configured (OLLAMA_ORIGINS="*").'
-          );
+          setError('Failed to generate chart. Please check your settings and try again.');
         }
       }
     });
@@ -130,8 +124,8 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
             animate={{ opacity: 1, y: 0 }}
             className="mx-auto max-w-2xl text-lg text-slate-600 dark:text-slate-400"
           >
-            Ask questions about your sales, profit, and customer data. InsightCanvas uses your local
-            Ollama LLM to generate interactive charts instantly.
+            Ask questions about your sales, profit, and customer data. InsightCanvas uses your
+            preferred AI provider to generate interactive charts instantly.
           </motion.p>
         </motion.div>
 
@@ -256,7 +250,7 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
             Your Dashboard
           </h2>
           <div className="text-sm text-slate-400">
-            {charts.length} visualization{charts.length !== 1 ? 's' : ''} generated
+            {charts.length} visualization{charts.length === 1 ? '' : 's'} generated
           </div>
         </div>
 
@@ -266,7 +260,7 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 gap-6 md:grid-cols-2"
+              className="grid grid-cols-1 gap-6 lg:grid-cols-2"
             >
               {charts.map((chart, index) => (
                 <motion.div

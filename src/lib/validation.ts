@@ -1,3 +1,4 @@
+import { AiProvider } from '@/types/ai';
 import { z } from 'zod';
 
 const ALLOWED_HOSTNAMES = ['localhost', '127.0.0.1', '0.0.0.0'] as const;
@@ -14,16 +15,16 @@ const LocalhostUrlSchema = z.url().refine(
     }
   },
   {
-    error: `Invalid URL format. Only localhost connections are allowed for security. Use one of: ${ALLOWED_HOSTNAMES.join(', ')}`
+    message: `Invalid URL format. Only localhost connections are allowed for security. Use one of: ${ALLOWED_HOSTNAMES.join(', ')}`
   }
 );
 
 const ModelNameSchema = z
-  .string({ error: 'Model name is required' })
-  .min(1, { error: 'Model name cannot be empty' })
-  .max(50, { error: 'Model name is too long (max 50 characters)' })
+  .string({ message: 'Model name is required' })
+  .min(1, { message: 'Model name cannot be empty' })
+  .max(50, { message: 'Model name is too long (max 50 characters)' })
   .regex(MODEL_NAME_PATTERN, {
-    error: 'Model name can only contain letters, numbers, and these characters: _ - : .'
+    message: 'Model name can only contain letters, numbers, and these characters: _ - : .'
   });
 
 export const OllamaConfigSchema = z.object({
@@ -31,20 +32,49 @@ export const OllamaConfigSchema = z.object({
   model: ModelNameSchema
 });
 
+export const ApiConfigSchema = z
+  .object({
+    provider: z.enum(AiProvider),
+    apiKey: z.string().optional(),
+    model: ModelNameSchema,
+    baseUrl: z.url().optional().or(z.literal(''))
+  })
+  .superRefine((data, ctx) => {
+    if (data.provider === AiProvider.OPENAI) {
+      if (!data.apiKey || data.apiKey.trim().length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'API Key is required for OpenAI',
+          path: ['apiKey']
+        });
+      }
+    }
+
+    if (data.provider === AiProvider.OPENAI_COMPATIBLE) {
+      if (!data.baseUrl || data.baseUrl.trim().length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Base URL is required for OpenAI Compatible providers',
+          path: ['baseUrl']
+        });
+      }
+    }
+  });
+
 export const UserQuerySchema = z
-  .string({ error: 'Query must be a string' })
+  .string({ message: 'Query must be a string' })
   .trim()
-  .min(5, { error: 'Query is too short (minimum 5 characters)' })
-  .max(500, { error: 'Query is too long (maximum 500 characters)' })
+  .min(5, { message: 'Query is too short (minimum 5 characters)' })
+  .max(500, { message: 'Query is too long (maximum 500 characters)' })
   .refine((query) => query.length > 0, {
-    error: 'Query cannot be empty after trimming whitespace'
+    message: 'Query cannot be empty after trimming whitespace'
   });
 
 export const OllamaResponseSchema = z.object({
-  model: z.string({ error: 'Response must include model name' }),
-  created_at: z.string({ error: 'Response must include creation timestamp' }),
-  response: z.string({ error: 'Response must include generated content' }),
-  done: z.boolean({ error: 'Response must include completion status' })
+  model: z.string({ message: 'Response must include model name' }),
+  created_at: z.string({ message: 'Response must include creation timestamp' }),
+  response: z.string({ message: 'Response must include generated content' }),
+  done: z.boolean({ message: 'Response must include completion status' })
 });
 
 export const ChartDataPointSchema = z.record(z.string(), z.union([z.string(), z.number()]));
@@ -52,26 +82,24 @@ export const ChartDataPointSchema = z.record(z.string(), z.union([z.string(), z.
 export const GeneratedChartSchema = z
   .object({
     title: z
-      .string({ error: 'Chart title is required' })
-      .min(1, { error: 'Chart title cannot be empty' })
-      .max(100, { error: 'Chart title is too long (max 100 characters)' }),
+      .string({ message: 'Chart title is required' })
+      .min(1, { message: 'Chart title cannot be empty' })
+      .max(100, { message: 'Chart title is too long (max 100 characters)' }),
     description: z
-      .string({ error: 'Chart description is required' })
-      .min(1, { error: 'Chart description cannot be empty' })
-      .max(200, { error: 'Chart description is too long (max 200 characters)' }),
-    type: z.enum(CHART_TYPES, {
-      error: `Chart type must be one of: ${CHART_TYPES.join(', ')}`
-    }),
+      .string({ message: 'Chart description is required' })
+      .min(1, { message: 'Chart description cannot be empty' })
+      .max(200, { message: 'Chart description is too long (max 200 characters)' }),
+    type: z.enum(CHART_TYPES),
     xAxisKey: z
-      .string({ error: 'X-axis key is required' })
-      .min(1, { error: 'X-axis key cannot be empty' }),
+      .string({ message: 'X-axis key is required' })
+      .min(1, { message: 'X-axis key cannot be empty' }),
     dataKey: z
-      .string({ error: 'Data key is required' })
-      .min(1, { error: 'Data key cannot be empty' }),
+      .string({ message: 'Data key is required' })
+      .min(1, { message: 'Data key cannot be empty' }),
     data: z
-      .array(ChartDataPointSchema, { error: 'Chart data must be an array' })
-      .min(1, { error: 'Chart must have at least one data point' })
-      .max(50, { error: 'Too many data points (max 50 for readability)' })
+      .array(ChartDataPointSchema)
+      .min(1, { message: 'Chart must have at least one data point' })
+      .max(50, { message: 'Too many data points (max 50 for readability)' })
   })
   .refine(
     (chart) => {
@@ -80,7 +108,7 @@ export const GeneratedChartSchema = z
       );
     },
     {
-      error: 'All data points must contain both xAxisKey and dataKey fields'
+      message: 'All data points must contain both xAxisKey and dataKey fields'
     }
   )
   .refine(
@@ -88,7 +116,7 @@ export const GeneratedChartSchema = z
       return chart.data.every((point) => typeof point[chart.dataKey] === 'number');
     },
     {
-      error: 'All dataKey values must be numbers for proper chart rendering'
+      message: 'All dataKey values must be numbers for proper chart rendering'
     }
   );
 

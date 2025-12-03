@@ -6,15 +6,11 @@ import { useCallback, useEffect, useState, useTransition } from 'react';
 
 import { ChartCard } from '@/components/ChartCard';
 import { SettingsModal } from '@/components/SettingsModal';
-import { DEFAULT_MODELS } from '@/lib/constants';
-import { generateChartFromPrompt } from '@/services/aiService';
-import { AiProvider, ApiConfig, GeneratedChart } from '@/types/ai';
+import { AiProvider, DEFAULT_MODELS } from '@/lib/constants';
+import { generateChartFromPrompt } from '@/services/ai-client';
+import { ApiConfig, GeneratedChart } from '@/types/ai';
 
-interface DashboardProps {
-  systemPromptTemplate: string;
-}
-
-export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardProps>) {
+export default function Dashboard() {
   const [query, setQuery] = useState('');
   const [charts, setCharts] = useState<GeneratedChart[]>([]);
   const [config, setConfig] = useState<ApiConfig>({
@@ -35,7 +31,7 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
 
     startTransition(async () => {
       try {
-        const chart = await generateChartFromPrompt(query, config, systemPromptTemplate);
+        const chart = await generateChartFromPrompt(query, config);
         const chartWithId = { ...chart, id: crypto.randomUUID() };
         setCharts((prev) => [chartWithId, ...prev]);
         setQuery('');
@@ -50,7 +46,7 @@ export default function Dashboard({ systemPromptTemplate }: Readonly<DashboardPr
         }
       }
     });
-  }, [query, config, systemPromptTemplate]);
+  }, [query, config]);
 
   const handleClear = useCallback(() => {
     setQuery('');

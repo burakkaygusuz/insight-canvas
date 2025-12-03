@@ -1,33 +1,10 @@
 import { GoogleGenAI } from '@google/genai';
 
 import { MOCK_DATASET, MOCK_SCHEMA } from '@/lib/constants';
-import { GeneratedChartSchema, safeValidate, UserQuerySchema } from '@/lib/validation';
-import { AiProvider, ApiConfig, GeneratedChart } from '@/types/ai';
+import { GeneratedChartSchema, safeValidate } from '@/lib/validation';
+import { ApiConfig, ChartGenerator, GeneratedChart } from '@/types/ai';
 
-interface AiStrategy {
-  generate(
-    prompt: string,
-    systemPromptTemplate: string,
-    config: ApiConfig
-  ): Promise<GeneratedChart>;
-}
-
-const REQUEST_TIMEOUT_MS = 60000; // Increased timeout for slower models
-
-function validateInputs(prompt: string, config: ApiConfig): void {
-  const queryValidation = safeValidate(UserQuerySchema, prompt);
-  if (!queryValidation.success) {
-    throw new Error(`Invalid query: ${queryValidation.error}`);
-  }
-
-  if (!config.model) throw new Error('Model is required');
-  if (!config.apiKey) {
-    throw new Error('API Key is required');
-  }
-  if (config.provider === AiProvider.OPENAI_COMPATIBLE && !config.baseUrl) {
-    throw new Error('Base URL is required for OpenAI Compatible providers');
-  }
-}
+const REQUEST_TIMEOUT_MS = 60000;
 
 function tryParseJson(text: string): unknown {
   try {
@@ -58,7 +35,7 @@ function tryParseJson(text: string): unknown {
   throw new Error('Failed to parse JSON response');
 }
 
-function parseAndValidateChart(jsonString: string): GeneratedChart {
+async function parseAndValidateChart(jsonString: string): Promise<GeneratedChart> {
   const parsed = tryParseJson(jsonString);
 
   if (
@@ -71,14 +48,14 @@ function parseAndValidateChart(jsonString: string): GeneratedChart {
     p.type = (p.type as string).toUpperCase();
   }
 
-  const chartValidation = safeValidate(GeneratedChartSchema, parsed);
+  const chartValidation = await safeValidate(GeneratedChartSchema, parsed);
   if (!chartValidation.success) {
     throw new Error(`Invalid chart structure: ${chartValidation.error}`);
   }
   return chartValidation.data;
 }
 
-class GoogleGeminiStrategy implements AiStrategy {
+export class GoogleGemini implements ChartGenerator {
   async generate(
     prompt: string,
     systemPromptTemplate: string,
@@ -113,8 +90,7 @@ class GoogleGeminiStrategy implements AiStrategy {
   }
 }
 
-// OpenAI Strategy
-class OpenAiStrategy implements AiStrategy {
+export class OpenAi implements ChartGenerator {
   async generate(
     prompt: string,
     systemPromptTemplate: string,
@@ -161,16 +137,13 @@ class OpenAiStrategy implements AiStrategy {
   }
 }
 
-// OpenAI Compatible Strategy
-class OpenAiCompatibleStrategy implements AiStrategy {
+export class OpenAiCompatible implements ChartGenerator {
   async generate(
     prompt: string,
     systemPromptTemplate: string,
     config: ApiConfig
   ): Promise<GeneratedChart> {
     const baseUrl = config.baseUrl!;
-
-    // Normalize in request path construction
 
     const systemPrompt = systemPromptTemplate
       .replace('{{SCHEMA}}', MOCK_SCHEMA)
@@ -212,22 +185,3 @@ class OpenAiCompatibleStrategy implements AiStrategy {
     }
   }
 }
-
-const strategies: Record<AiProvider, AiStrategy> = {
-  [AiProvider.GOOGLE]: new GoogleGeminiStrategy(),
-  [AiProvider.OPENAI]: new OpenAiStrategy(),
-  [AiProvider.OPENAI_COMPATIBLE]: new OpenAiCompatibleStrategy()
-};
-
-export const generateChartFromPrompt = async (
-  prompt: string,
-  config: ApiConfig,
-  systemPromptTemplate: string
-): Promise<GeneratedChart> => {
-  validateInputs(prompt, config);
-
-  const strategy = strategies[config.provider];
-  if (!strategy) throw new Error(`Provider ${config.provider} not implemented`);
-
-  return strategy.generate(prompt, systemPromptTemplate, config);
-};

@@ -1,23 +1,8 @@
-import { AiProvider } from '@/types/ai';
+import { AiProvider } from '@/lib/constants';
 import { z } from 'zod';
 
-const ALLOWED_HOSTNAMES = ['localhost', '127.0.0.1', '0.0.0.0'] as const;
 const MODEL_NAME_PATTERN = /^[a-zA-Z0-9_\-:.]+$/;
 const CHART_TYPES = ['BAR', 'LINE', 'AREA', 'PIE'] as const;
-
-const LocalhostUrlSchema = z.url().refine(
-  (url) => {
-    try {
-      const parsed = new URL(url);
-      return ALLOWED_HOSTNAMES.includes(parsed.hostname as (typeof ALLOWED_HOSTNAMES)[number]);
-    } catch {
-      return false;
-    }
-  },
-  {
-    message: `Invalid URL format. Only localhost connections are allowed for security. Use one of: ${ALLOWED_HOSTNAMES.join(', ')}`
-  }
-);
 
 const ModelNameSchema = z
   .string({ message: 'Model name is required' })
@@ -26,11 +11,6 @@ const ModelNameSchema = z
   .regex(MODEL_NAME_PATTERN, {
     message: 'Model name can only contain letters, numbers, and these characters: _ - : .'
   });
-
-export const OllamaConfigSchema = z.object({
-  baseUrl: LocalhostUrlSchema,
-  model: ModelNameSchema
-});
 
 export const ApiConfigSchema = z
   .object({
@@ -69,13 +49,6 @@ export const UserQuerySchema = z
   .refine((query) => query.length > 0, {
     message: 'Query cannot be empty after trimming whitespace'
   });
-
-export const OllamaResponseSchema = z.object({
-  model: z.string({ message: 'Response must include model name' }),
-  created_at: z.string({ message: 'Response must include creation timestamp' }),
-  response: z.string({ message: 'Response must include generated content' }),
-  done: z.boolean({ message: 'Response must include completion status' })
-});
 
 export const ChartDataPointSchema = z.record(z.string(), z.union([z.string(), z.number()]));
 
@@ -120,28 +93,24 @@ export const GeneratedChartSchema = z
     }
   );
 
-export type OllamaConfigInput = z.input<typeof OllamaConfigSchema>;
-export type OllamaConfigOutput = z.output<typeof OllamaConfigSchema>;
 export type UserQueryInput = z.input<typeof UserQuerySchema>;
 export type UserQueryOutput = z.output<typeof UserQuerySchema>;
-export type OllamaResponseInput = z.input<typeof OllamaResponseSchema>;
-export type OllamaResponseOutput = z.output<typeof OllamaResponseSchema>;
 export type ChartDataPointInput = z.input<typeof ChartDataPointSchema>;
 export type ChartDataPointOutput = z.output<typeof ChartDataPointSchema>;
 export type GeneratedChartInput = z.input<typeof GeneratedChartSchema>;
 export type GeneratedChartOutput = z.output<typeof GeneratedChartSchema>;
 
-export function formatZodError(error: z.ZodError): string {
-  return error.issues.map((issue) => issue.message).join(', ');
-}
-
-export function safeValidate<T extends z.ZodTypeAny>(
+export async function safeValidate<T extends z.ZodTypeAny>(
   schema: T,
   data: unknown
-): { success: true; data: z.infer<T> } | { success: false; error: string } {
-  const result = schema.safeParse(data);
+): Promise<{ success: true; data: z.infer<T> } | { success: false; error: string }> {
+  const result = await schema.safeParseAsync(data);
   if (result.success) {
     return { success: true, data: result.data };
   }
   return { success: false, error: formatZodError(result.error) };
+}
+
+export function formatZodError(error: z.ZodError): string {
+  return error.issues.map((issue) => issue.message).join(', ');
 }

@@ -152,7 +152,11 @@ export const TOOLTIP_STYLE = {
   itemStyle: { color: 'var(--foreground)' }
 } as const;
 
-import { AiProvider } from '@/types/ai';
+export enum AiProvider {
+  GOOGLE = 'GOOGLE',
+  OPENAI = 'OPENAI',
+  OPENAI_COMPATIBLE = 'OPENAI_COMPATIBLE'
+}
 
 export const DEFAULT_MODELS = {
   [AiProvider.GOOGLE]: 'gemini-2.5-flash',

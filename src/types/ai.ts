@@ -1,14 +1,19 @@
+export { AiProvider } from '@/lib/constants';
 export type { GeneratedChart } from './chart';
-
-export enum AiProvider {
-  GOOGLE = 'GOOGLE',
-  OPENAI = 'OPENAI',
-  OPENAI_COMPATIBLE = 'OPENAI_COMPATIBLE'
-}
+import { AiProvider } from '@/lib/constants';
+import type { GeneratedChart } from './chart';
 
 export interface ApiConfig {
   provider: AiProvider;
   apiKey?: string;
   model: string;
   baseUrl?: string;
+}
+
+export interface ChartGenerator {
+  generate(
+    prompt: string,
+    systemPromptTemplate: string,
+    config: ApiConfig
+  ): Promise<GeneratedChart>;
 }

@@ -76,8 +76,8 @@ export const SettingsModal = memo(function SettingsModal({
     [config]
   );
 
-  const handleSave = useCallback(() => {
-    const validation = safeValidate(ApiConfigSchema, {
+  const handleSave = useCallback(async () => {
+    const validation = await safeValidate(ApiConfigSchema, {
       provider,
       apiKey,
       model,

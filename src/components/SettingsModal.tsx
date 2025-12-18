@@ -207,7 +207,7 @@ export const SettingsModal = memo(function SettingsModal({
                   setModel(e.target.value);
                   setValidationError(null);
                 }}
-                placeholder="e.g. gpt-4o, gemini-pro, etc."
+                placeholder="e.g. gpt-5.2, gemini-pro, etc."
               />
             </div>
           </div>

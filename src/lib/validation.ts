@@ -57,11 +57,11 @@ export const GeneratedChartSchema = z
     title: z
       .string({ message: 'Chart title is required' })
       .min(1, { message: 'Chart title cannot be empty' })
-      .max(100, { message: 'Chart title is too long (max 100 characters)' }),
+      .max(200, { message: 'Chart title is too long (max 200 characters)' }),
     description: z
       .string({ message: 'Chart description is required' })
       .min(1, { message: 'Chart description cannot be empty' })
-      .max(200, { message: 'Chart description is too long (max 200 characters)' }),
+      .max(1000, { message: 'Chart description is too long (max 1000 characters)' }),
     type: z.enum(CHART_TYPES),
     xAxisKey: z
       .string({ message: 'X-axis key is required' })
@@ -72,7 +72,7 @@ export const GeneratedChartSchema = z
     data: z
       .array(ChartDataPointSchema)
       .min(1, { message: 'Chart must have at least one data point' })
-      .max(50, { message: 'Too many data points (max 50 for readability)' })
+      .max(2000, { message: 'Too many data points (max 2000 for performance)' })
   })
   .refine(
     (chart) => {

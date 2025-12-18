@@ -56,11 +56,11 @@ Return ONLY a valid JSON object with this EXACT structure:
 
 ```json
 {
-  "title": "string (max 60 chars, descriptive chart title)",
-  "description": "string (max 120 chars, explains what the chart shows)",
+  "title": "string (max 200 chars, descriptive chart title)",
+  "description": "string (max 500 chars, explains what the chart shows)",
   "type": "BAR" | "LINE" | "AREA" | "PIE",
-  "xAxisKey": "string (field name for x-axis, e.g., 'date', 'region')",
-  "dataKey": "string (field name for values, e.g., 'sales', 'profit')",
+  "xAxisKey": "string (field name for x-axis, CANNOT be empty, e.g., 'date', 'region')",
+  "dataKey": "string (field name for values, CANNOT be empty, e.g., 'sales', 'profit')",
   "data": [
     {
       "<xAxisKey>": "string or number (must match xAxisKey)",
@@ -89,7 +89,7 @@ Return ONLY a valid JSON object with this EXACT structure:
 ```json
 {
   "title": "Total Sales by Region",
-  "description": "Comparison of sales performance across all regions",
+  "description": "Comparison of sales performance across all regions indicating strong growth in North America.",
   "type": "BAR",
   "xAxisKey": "region",
   "dataKey": "totalSales",
@@ -114,6 +114,6 @@ If the query cannot be satisfied:
 
 - Focus on answering the user's question clearly
 - Choose chart types that best communicate the insight
-- Keep data aggregated and concise (max 20 data points for readability)
+- Keep data aggregated if needed, but you can include up to 2000 data points for detailed trends
 - Ensure all numbers are properly formatted (no strings for numeric values)
 - Match the field names in `data` objects to `xAxisKey` and `dataKey` exactly

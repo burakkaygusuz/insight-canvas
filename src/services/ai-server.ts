@@ -1,7 +1,7 @@
 import { AiProvider } from '@/lib/constants';
 import { safeValidate, UserQuerySchema } from '@/lib/validation';
 import { GoogleGemini, OpenAi, OpenAiCompatible } from '@/services/ai-providers';
-import { ApiConfig, ChartGenerator, GeneratedChart } from '@/types/ai';
+import { ApiConfig, ChartGenerator, DynamicData, GeneratedChart } from '@/types/ai';
 
 async function validateInputs(prompt: string, config: ApiConfig): Promise<void> {
   const queryValidation = await safeValidate(UserQuerySchema, prompt);
@@ -27,11 +27,22 @@ const strategies: Record<AiProvider, ChartGenerator> = {
 export async function generateChartOnServer(
   prompt: string,
   config: ApiConfig,
-  systemPromptTemplate: string
+  systemPromptTemplate: string,
+  dynamicData?: DynamicData
 ): Promise<GeneratedChart> {
   await validateInputs(prompt, config);
 
   const strategy = strategies[config.provider];
   if (!strategy) throw new Error(`Provider ${config.provider} not implemented`);
-  return strategy.generate(prompt, systemPromptTemplate, config);
+  return strategy.generate(prompt, systemPromptTemplate, config, dynamicData);
+}
+
+export async function generateSuggestionsOnServer(
+  config: ApiConfig,
+  systemPromptTemplate: string,
+  dynamicData: DynamicData
+): Promise<string[]> {
+  const strategy = strategies[config.provider];
+  if (!strategy) throw new Error(`Provider ${config.provider} not implemented`);
+  return strategy.generateSuggestions(systemPromptTemplate, config, dynamicData);
 }

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { AlertCircle, Settings } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import {
   Dialog,
@@ -24,18 +23,20 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/Select';
-import { DEFAULT_MODELS, POPULAR_MODELS, PROVIDER_LABELS } from '@/lib/constants';
+import { AiProvider, PROVIDER_LABELS } from '@/lib/constants';
 import { ApiConfigSchema, safeValidate } from '@/lib/validation';
-import { AiProvider, ApiConfig } from '@/types/ai';
+import { ApiConfig } from '@/types/ai';
 
 interface SettingsModalProps {
   config: ApiConfig;
   onSave: (config: ApiConfig) => void;
+  trigger?: React.ReactNode;
 }
 
 export const SettingsModal = memo(function SettingsModal({
   config,
-  onSave
+  onSave,
+  trigger
 }: Readonly<SettingsModalProps>) {
   const [open, setOpen] = useState(false);
   const [provider, setProvider] = useState<AiProvider>(config.provider);
@@ -62,7 +63,6 @@ export const SettingsModal = memo(function SettingsModal({
     (value: string) => {
       const newProvider = value as AiProvider;
       setProvider(newProvider);
-      setModel(DEFAULT_MODELS[newProvider]);
       setValidationError(null);
 
       if (newProvider === config.provider) {
@@ -106,12 +106,14 @@ export const SettingsModal = memo(function SettingsModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <motion.div whileHover={{ scale: 1.05, rotate: 90 }} whileTap={{ scale: 0.95 }}>
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Settings className="h-5 w-5 text-slate-600 dark:text-slate-300" />
-            <span className="sr-only">Settings</span>
-          </Button>
-        </motion.div>
+        {trigger ?? (
+          <motion.div whileHover={{ scale: 1.05, rotate: 90 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="outline" size="icon" className="rounded-full">
+              <Settings className="text-muted-foreground h-5 w-5" />
+              <span className="sr-only">Settings</span>
+            </Button>
+          </motion.div>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <motion.div
@@ -133,7 +135,6 @@ export const SettingsModal = memo(function SettingsModal({
           transition={{ delay: 0.1, duration: 0.3 }}
           className="grid gap-4 py-4"
         >
-          {/* Provider Selection */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="provider" className="text-right">
               Provider
@@ -153,8 +154,6 @@ export const SettingsModal = memo(function SettingsModal({
               </Select>
             </div>
           </div>
-
-          {/* API Key Input */}
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -172,13 +171,9 @@ export const SettingsModal = memo(function SettingsModal({
                 setValidationError(null);
               }}
               className="col-span-3"
-              placeholder={
-                provider === AiProvider.GOOGLE ? 'Leave empty to use env variable' : 'sk-...'
-              }
+              placeholder={provider === AiProvider.GOOGLE ? 'Enter API Key...' : 'sk-...'}
             />
           </motion.div>
-
-          {/* Base URL Input (Only for OpenAI Compatible) */}
           {provider === AiProvider.OPENAI_COMPATIBLE && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -200,13 +195,11 @@ export const SettingsModal = memo(function SettingsModal({
               />
             </motion.div>
           )}
-
-          {/* Model Input */}
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="model" className="pt-3 text-right">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="model" className="text-right">
               Model
             </Label>
-            <div className="col-span-3 space-y-2">
+            <div className="col-span-3">
               <Input
                 id="model"
                 value={model}
@@ -214,20 +207,8 @@ export const SettingsModal = memo(function SettingsModal({
                   setModel(e.target.value);
                   setValidationError(null);
                 }}
-                placeholder={DEFAULT_MODELS[provider]}
+                placeholder="e.g. gpt-4o, gemini-pro, etc."
               />
-              <div className="flex flex-wrap gap-2">
-                {POPULAR_MODELS[provider].map((modelName) => (
-                  <Badge
-                    key={modelName}
-                    variant={model === modelName ? 'default' : 'secondary'}
-                    className="cursor-pointer transition-colors hover:bg-indigo-100 hover:text-indigo-700 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-300"
-                    onClick={() => setModel(modelName)}
-                  >
-                    {modelName}
-                  </Badge>
-                ))}
-              </div>
             </div>
           </div>
         </motion.div>

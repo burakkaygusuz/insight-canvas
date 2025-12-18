@@ -20,7 +20,7 @@ import {
   YAxis
 } from 'recharts';
 
-import { CHART_COLORS, TOOLTIP_STYLE } from '@/lib/constants';
+import { CHART_COLORS } from '@/lib/constants';
 import { GeneratedChart } from '@/types/chart';
 
 interface ChartRendererProps {
@@ -35,100 +35,121 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
       case 'BAR':
         return (
           <BarChart data={data}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              className="stroke-slate-100 dark:stroke-slate-800"
-            />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
             <XAxis
               dataKey={xAxisKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 12 }}
+              tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
               dy={10}
             />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+            />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'var(--background)',
+                backgroundColor: 'var(--card)',
                 borderColor: 'var(--border)',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                color: 'var(--card-foreground)',
+                borderRadius: '12px',
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
                 fontSize: '12px'
               }}
-              cursor={{ fill: '#f1f5f9', opacity: 0.5 }}
+              cursor={{ fill: 'var(--muted)', opacity: 0.2 }}
             />
-            <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
-            <Bar dataKey={dataKey} fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={60} />
+            <Legend
+              wrapperStyle={{
+                paddingTop: '20px',
+                fontSize: '12px',
+                color: 'var(--muted-foreground)'
+              }}
+            />
+            <Bar dataKey={dataKey} fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={60} />
           </BarChart>
         );
       case 'LINE':
         return (
           <LineChart data={data}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              className="stroke-slate-100 dark:stroke-slate-800"
-            />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
             <XAxis
               dataKey={xAxisKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 12 }}
+              tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
               dy={10}
             />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+            />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'var(--background)',
+                backgroundColor: 'var(--card)',
                 borderColor: 'var(--border)',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                color: 'var(--card-foreground)',
+                borderRadius: '12px',
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
                 fontSize: '12px'
               }}
             />
-            <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
+            <Legend
+              wrapperStyle={{
+                paddingTop: '20px',
+                fontSize: '12px',
+                color: 'var(--muted-foreground)'
+              }}
+            />
             <Line
               type="monotone"
               dataKey={dataKey}
-              stroke="#6366f1"
+              stroke="var(--primary)"
               strokeWidth={3}
-              dot={{ r: 4, fill: '#fff', strokeWidth: 2 }}
-              activeDot={{ r: 6, strokeWidth: 0 }}
+              dot={{ r: 4, fill: 'var(--background)', strokeWidth: 2, stroke: 'var(--primary)' }}
+              activeDot={{ r: 6, strokeWidth: 0, fill: 'var(--primary)' }}
             />
           </LineChart>
         );
       case 'AREA':
         return (
           <AreaChart data={data}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              className="stroke-slate-100 dark:stroke-slate-800"
-            />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
             <XAxis
               dataKey={xAxisKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 12 }}
+              tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
               dy={10}
             />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+            />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'var(--background)',
+                backgroundColor: 'var(--card)',
                 borderColor: 'var(--border)',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                color: 'var(--card-foreground)',
+                borderRadius: '12px',
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
                 fontSize: '12px'
               }}
             />
-            <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }} />
+            <Legend
+              wrapperStyle={{
+                paddingTop: '20px',
+                fontSize: '12px',
+                color: 'var(--muted-foreground)'
+              }}
+            />
             <Area
               type="monotone"
               dataKey={dataKey}
-              stroke="#6366f1"
-              fill="#6366f1"
+              stroke="var(--primary)"
+              fill="var(--primary)"
               fillOpacity={0.2}
               strokeWidth={2}
             />
@@ -144,18 +165,29 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
               cx="50%"
               cy="50%"
               outerRadius={80}
-              fill="#6366f1"
+              fill="var(--primary)"
               label
             >
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${String(entry[xAxisKey] ?? index)}`}
                   fill={CHART_COLORS[index % CHART_COLORS.length]}
+                  stroke="var(--card)"
+                  strokeWidth={2}
                 />
               ))}
             </Pie>
-            <Tooltip {...TOOLTIP_STYLE} />
-            <Legend />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
+                color: 'var(--card-foreground)',
+                borderRadius: '12px',
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                fontSize: '12px'
+              }}
+            />
+            <Legend wrapperStyle={{ color: 'var(--muted-foreground)' }} />
           </PieChart>
         );
       default:

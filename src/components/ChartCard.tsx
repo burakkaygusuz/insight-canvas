@@ -24,8 +24,13 @@ export const ChartCard = memo(function ChartCard({ chart, onDelete }: Readonly<C
   }, [chart]);
 
   return (
-    <motion.div layout whileHover={{ y: -4 }} transition={{ duration: 0.2, ease: 'easeOut' }}>
-      <Card className="flex h-[400px] w-full flex-col border-slate-200 shadow-md transition-shadow duration-300 hover:shadow-xl dark:border-slate-800">
+    <motion.div
+      className="h-full"
+      layout
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+    >
+      <Card className="hover:border-primary/20 hover:bg-card/70 flex h-full min-h-[350px] w-full flex-col shadow-md transition-all duration-300 hover:shadow-xl">
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
           <motion.div
             initial={{ opacity: 0, x: -10 }}
@@ -33,10 +38,10 @@ export const ChartCard = memo(function ChartCard({ chart, onDelete }: Readonly<C
             transition={{ duration: 0.3, delay: 0.1 }}
             className="space-y-1"
           >
-            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <CardTitle className="text-foreground text-lg font-semibold tracking-tight">
               {chart.title}
             </CardTitle>
-            <CardDescription className="text-sm text-slate-500 dark:text-slate-400">
+            <CardDescription className="text-muted-foreground text-sm">
               {chart.description}
             </CardDescription>
           </motion.div>
@@ -62,14 +67,14 @@ export const ChartCard = memo(function ChartCard({ chart, onDelete }: Readonly<C
                     ✓
                   </motion.span>
                 ) : (
-                  <Copy className="h-4 w-4 text-slate-500 transition-colors hover:text-indigo-600" />
+                  <Copy className="text-muted-foreground hover:text-primary h-4 w-4 transition-colors" />
                 )}
                 <span className="sr-only">Copy</span>
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button variant="ghost" size="icon" onClick={onDelete} title="Delete Chart">
-                <Trash2 className="h-4 w-4 text-slate-500 transition-colors hover:text-red-600" />
+                <Trash2 className="text-muted-foreground hover:text-destructive h-4 w-4 transition-colors" />
                 <span className="sr-only">Delete</span>
               </Button>
             </motion.div>

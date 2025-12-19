@@ -1,5 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
-
 import { MAX_ROWS_FOR_AI } from '@/lib/constants';
 import { GeneratedChartSchema, safeValidate } from '@/lib/validation';
 import { ApiConfig, ChartGenerator, ChatMessage, DynamicData, GeneratedChart } from '@/types/ai';
@@ -65,8 +63,6 @@ export class GoogleGemini implements ChartGenerator {
     if (!config.apiKey) throw new Error('Google API Key is required');
     if (!dynamicData) throw new Error('Please upload a dataset first');
 
-    const ai = new GoogleGenAI({ apiKey: config.apiKey });
-
     const schema = dynamicData.schema;
     const dataset = dynamicData.dataset.slice(0, MAX_ROWS_FOR_AI);
 
@@ -74,28 +70,8 @@ export class GoogleGemini implements ChartGenerator {
       .replace('{{SCHEMA}}', schema)
       .replace('{{DATASET}}', JSON.stringify(dataset));
 
-    try {
-      const response = await ai.models.generateContent({
-        model: config.model,
-        contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\nUser Query: ' + prompt }] }],
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
-
-      const responseText = response.text;
-      if (!responseText) {
-        throw new Error('Empty response from Google Gemini');
-      }
-      return parseAndValidateChart(responseText);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('401'))
-        throw new Error('Invalid Google API Key. Please check your settings.');
-      if (errorMessage.includes('429'))
-        throw new Error('Google API rate limit exceeded. Please try again later.');
-      throw new Error(`Google API Error: ${errorMessage}`);
-    }
+    const content = await this.performRequest(config, systemPrompt, prompt);
+    return parseAndValidateChart(content);
   }
 
   async generateSuggestions(
@@ -105,9 +81,7 @@ export class GoogleGemini implements ChartGenerator {
   ): Promise<string[]> {
     if (!config.apiKey) throw new Error('Google API Key is required');
 
-    const ai = new GoogleGenAI({ apiKey: config.apiKey });
     const dataset = dynamicData.dataset.slice(0, MAX_ROWS_FOR_AI);
-
     const prompt = `
       Analyze the following dataset schema and data sample.
       Generate 3 insightful questions that a user could ask to create meaningful charts/visualizations from this data.
@@ -121,18 +95,73 @@ export class GoogleGemini implements ChartGenerator {
     `;
 
     try {
-      const response = await ai.models.generateContent({
-        model: config.model,
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        config: { responseMimeType: 'application/json' }
-      });
-
-      const responseText = response.text || '{}';
-      const parsed = tryParseJson(responseText) as { suggestions?: string[] };
+      const content = await this.performRequest(config, undefined, prompt);
+      const parsed = tryParseJson(content) as { suggestions?: string[] };
       return parsed.suggestions || [];
     } catch (error) {
       console.error('Suggestion generation failed:', error);
       return [];
+    }
+  }
+
+  private async performRequest(
+    config: ApiConfig,
+    systemPrompt: string | undefined,
+    userPrompt: string
+  ): Promise<string> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`;
+
+      const contents = [];
+      if (systemPrompt) {
+        // Google Gemini doesn't have a distinct 'system' role in the same way as OpenAI/Anthropic in the REST API consistently across versions
+        // but prepending it to user prompt or using strict structure is common.
+        // For simplicity and compatibility with the previous SDK usage pattern:
+        contents.push({
+          role: 'user',
+          parts: [{ text: systemPrompt + '\n\nUser Query: ' + userPrompt }]
+        });
+      } else {
+        contents.push({ role: 'user', parts: [{ text: userPrompt }] });
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: contents,
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        }),
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        if (response.status === 401)
+          throw new Error('Invalid Google API Key. Please check your settings.');
+        if (response.status === 429)
+          throw new Error('Google API rate limit exceeded. Please try again later.');
+
+        const err = await response.text();
+        throw new Error(`Google API Error: ${response.status} - ${err}`);
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!content) {
+        throw new Error('Empty response from Google Gemini');
+      }
+
+      return content;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 }
@@ -237,7 +266,7 @@ abstract class BaseOpenAiProvider implements ChartGenerator {
 }
 
 export class OpenAi extends BaseOpenAiProvider {
-  protected getBaseUrl(_config: ApiConfig): string {
+  protected getBaseUrl(): string {
     return 'https://api.openai.com/v1';
   }
 

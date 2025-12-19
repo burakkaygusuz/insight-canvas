@@ -1,13 +1,25 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Copy, Trash2 } from 'lucide-react';
+import { Copy, Loader2, Trash2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { memo, useCallback, useState } from 'react';
 
-import { ChartRenderer } from '@/components/ChartRenderer';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { GeneratedChart } from '@/types/chart';
+
+const ChartRenderer = dynamic(
+  () => import('@/components/ChartRenderer').then((mod) => mod.ChartRenderer),
+  {
+    loading: () => (
+      <div className="text-muted-foreground/50 flex h-full w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    ),
+    ssr: false
+  }
+);
 
 interface ChartCardProps {
   chart: GeneratedChart;

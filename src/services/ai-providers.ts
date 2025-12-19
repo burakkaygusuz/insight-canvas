@@ -68,7 +68,8 @@ export class GoogleGemini implements ChartGenerator {
 
     const systemPrompt = systemPromptTemplate
       .replace('{{SCHEMA}}', schema)
-      .replace('{{DATASET}}', JSON.stringify(dataset));
+      .replace('{{DATASET}}', JSON.stringify(dataset))
+      .replace('{{MAX_ROWS}}', MAX_ROWS_FOR_AI.toString());
 
     const content = await this.performRequest(config, systemPrompt, prompt);
     return parseAndValidateChart(content);
@@ -184,7 +185,8 @@ abstract class BaseOpenAiProvider implements ChartGenerator {
 
     const systemPrompt = systemPromptTemplate
       .replace('{{SCHEMA}}', schema)
-      .replace('{{DATASET}}', JSON.stringify(dataset));
+      .replace('{{DATASET}}', JSON.stringify(dataset))
+      .replace('{{MAX_ROWS}}', MAX_ROWS_FOR_AI.toString());
 
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -300,7 +302,8 @@ export class Anthropic implements ChartGenerator {
 
     const systemPrompt = systemPromptTemplate
       .replace('{{SCHEMA}}', schema)
-      .replace('{{DATASET}}', JSON.stringify(dataset));
+      .replace('{{DATASET}}', JSON.stringify(dataset))
+      .replace('{{MAX_ROWS}}', MAX_ROWS_FOR_AI.toString());
 
     const content = await this.performRequest(config, systemPrompt, prompt);
     return parseAndValidateChart(content);

@@ -1,15 +1,35 @@
-import { AiProvider } from '@/lib/constants';
+import { AiProvider, MAX_FILE_SIZE_MB } from '@/lib/constants';
 import { z } from 'zod';
 
 const MODEL_NAME_PATTERN = /^[a-zA-Z0-9_\-:.]+$/;
 const CHART_TYPES = ['BAR', 'LINE', 'AREA', 'PIE'] as const;
+const ACCEPTED_FILE_TYPES = [
+  'text/csv',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel'
+];
+
+export const FileSchema = z
+  .instanceof(File)
+  .refine((file) => file.size <= MAX_FILE_SIZE_MB * 1024 * 1024, {
+    message: `The file is too large. Please upload a file smaller than ${MAX_FILE_SIZE_MB}MB.`
+  })
+  .refine(
+    (file) => {
+      // Check MIME type or extension as a fallback
+      return ACCEPTED_FILE_TYPES.includes(file.type) || /\.(csv|xlsx|xls)$/i.test(file.name);
+    },
+    {
+      message: 'Unsupported file format. Please upload a CSV or Excel (.xlsx, .xls) file.'
+    }
+  );
 
 const ModelNameSchema = z
-  .string({ message: 'Model name is required' })
-  .min(1, { message: 'Model name cannot be empty' })
-  .max(50, { message: 'Model name is too long (max 50 characters)' })
+  .string({ message: 'Please provide a model name.' })
+  .min(1, { message: 'Model name cannot be empty.' })
+  .max(50, { message: 'The model name is too long (maximum 50 characters).' })
   .regex(MODEL_NAME_PATTERN, {
-    message: 'Model name can only contain letters, numbers, and these characters: _ - : .'
+    message: 'Model names can only contain letters, numbers, and the following characters: _ - : .'
   });
 
 export const ApiConfigSchema = z
@@ -17,14 +37,14 @@ export const ApiConfigSchema = z
     provider: z.enum(AiProvider),
     apiKey: z.string().optional(),
     model: ModelNameSchema,
-    baseUrl: z.url().optional().or(z.literal(''))
+    baseUrl: z.url({ message: 'Please enter a valid URL.' }).optional().or(z.literal(''))
   })
   .superRefine((data, ctx) => {
     if (data.provider === AiProvider.OPENAI) {
       if (!data.apiKey || data.apiKey.trim().length === 0) {
         ctx.addIssue({
           code: 'custom',
-          message: 'API Key is required for OpenAI',
+          message: 'An API Key is required for OpenAI.',
           path: ['apiKey']
         });
       }
@@ -34,7 +54,7 @@ export const ApiConfigSchema = z
       if (!data.baseUrl || data.baseUrl.trim().length === 0) {
         ctx.addIssue({
           code: 'custom',
-          message: 'Base URL is required for OpenAI Compatible providers',
+          message: 'A Base URL is required for this provider.',
           path: ['baseUrl']
         });
       }
@@ -42,15 +62,13 @@ export const ApiConfigSchema = z
   });
 
 export const UserQuerySchema = z
-  .string({ message: 'Query must be a string' })
+  .string({ message: 'Please enter a valid search query.' })
   .trim()
-  .min(5, { message: 'Query is too short (minimum 5 characters)' })
-  .max(500, { message: 'Query is too long (maximum 500 characters)' })
+  .min(5, { message: 'Your query is a bit too short. Please use at least 5 characters.' })
+  .max(500, { message: 'Your query is a bit too long. Please keep it under 500 characters.' })
   .refine((query) => query.length > 0, {
-    message: 'Query cannot be empty after trimming whitespace'
+    message: 'Please describe the chart you would like to create.'
   });
-
-export const ChartDataPointSchema = z.record(z.string(), z.union([z.string(), z.number()]));
 
 export const GeneratedChartSchema = z
   .object({
@@ -70,33 +88,29 @@ export const GeneratedChartSchema = z
       .string({ message: 'Data key is required' })
       .min(1, { message: 'Data key cannot be empty' }),
     data: z
-      .array(ChartDataPointSchema)
+      .array(z.array(z.union([z.string(), z.number()])))
       .min(1, { message: 'Chart must have at least one data point' })
       .max(2000, { message: 'Too many data points (max 2000 for performance)' })
   })
   .refine(
     (chart) => {
-      return chart.data.every(
-        (point) => point[chart.xAxisKey] !== undefined && point[chart.dataKey] !== undefined
-      );
+      return chart.data.every((row) => row.length >= 2);
     },
     {
-      message: 'All data points must contain both xAxisKey and dataKey fields'
+      message: 'Data points must be arrays with at least 2 elements (X and Y values).'
     }
   )
   .refine(
     (chart) => {
-      return chart.data.every((point) => typeof point[chart.dataKey] === 'number');
+      return chart.data.every((row) => typeof row[1] === 'number');
     },
     {
-      message: 'All dataKey values must be numbers for proper chart rendering'
+      message: 'The second element in each data point (value) must be a number.'
     }
   );
 
 export type UserQueryInput = z.input<typeof UserQuerySchema>;
 export type UserQueryOutput = z.output<typeof UserQuerySchema>;
-export type ChartDataPointInput = z.input<typeof ChartDataPointSchema>;
-export type ChartDataPointOutput = z.output<typeof ChartDataPointSchema>;
 export type GeneratedChartInput = z.input<typeof GeneratedChartSchema>;
 export type GeneratedChartOutput = z.output<typeof GeneratedChartSchema>;
 

@@ -5,12 +5,15 @@ export async function generateChartFromPrompt(
   config: ApiConfig,
   dynamicData?: DynamicData
 ): Promise<GeneratedChart> {
+  const { apiKey, ...safeConfig } = config;
+
   const response = await fetch('/api/generate', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'x-ai-api-key': apiKey || ''
     },
-    body: JSON.stringify({ prompt, config, dynamicData })
+    body: JSON.stringify({ prompt, config: safeConfig, dynamicData })
   });
 
   if (!response.ok) {
@@ -39,12 +42,15 @@ export async function generateSuggestions(
   config: ApiConfig,
   dynamicData: DynamicData
 ): Promise<string[]> {
+  const { apiKey, ...safeConfig } = config;
+
   const response = await fetch('/api/generate', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'x-ai-api-key': apiKey || ''
     },
-    body: JSON.stringify({ config, dynamicData, mode: 'suggestions' })
+    body: JSON.stringify({ config: safeConfig, dynamicData, mode: 'suggestions' })
   });
 
   if (!response.ok) {

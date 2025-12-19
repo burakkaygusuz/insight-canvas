@@ -1,6 +1,6 @@
 import { AiProvider } from '@/lib/constants';
 import { safeValidate, UserQuerySchema } from '@/lib/validation';
-import { GoogleGemini, OpenAi, OpenAiCompatible } from '@/services/ai-providers';
+import { Anthropic, GoogleGemini, OpenAi, OpenAiCompatible } from '@/services/ai-providers';
 import { ApiConfig, ChartGenerator, DynamicData, GeneratedChart } from '@/types/ai';
 
 async function validateInputs(prompt: string, config: ApiConfig): Promise<void> {
@@ -21,7 +21,8 @@ async function validateInputs(prompt: string, config: ApiConfig): Promise<void> 
 const strategies: Record<AiProvider, ChartGenerator> = {
   [AiProvider.GOOGLE]: new GoogleGemini(),
   [AiProvider.OPENAI]: new OpenAi(),
-  [AiProvider.OPENAI_COMPATIBLE]: new OpenAiCompatible()
+  [AiProvider.OPENAI_COMPATIBLE]: new OpenAiCompatible(),
+  [AiProvider.ANTHROPIC]: new Anthropic()
 };
 
 export async function generateChartOnServer(

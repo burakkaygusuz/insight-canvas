@@ -5,17 +5,30 @@ import path from 'node:path';
 import { generateChartOnServer, generateSuggestionsOnServer } from '@/services/ai-server';
 import { ApiConfig, DynamicData } from '@/types/ai';
 
+let cachedSystemPrompt: string | null = null;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { prompt, config, dynamicData, mode } = body;
+    const { prompt, config: bodyConfig, dynamicData, mode } = body;
+    const apiKey = request.headers.get('x-ai-api-key');
 
-    if (!config) {
+    if (!bodyConfig) {
       return NextResponse.json({ error: 'Missing config' }, { status: 400 });
     }
 
-    const promptPath = path.join(process.cwd(), 'src/prompts/system.md');
-    const systemPromptTemplate = await fs.readFile(promptPath, 'utf8');
+    const config = { ...bodyConfig, apiKey: apiKey || bodyConfig.apiKey } as ApiConfig;
+
+    if (!config.apiKey) {
+      return NextResponse.json({ error: 'Missing API Key' }, { status: 401 });
+    }
+
+    if (!cachedSystemPrompt) {
+      const promptPath = path.join(process.cwd(), 'src/prompts/system.md');
+      cachedSystemPrompt = await fs.readFile(promptPath, 'utf8');
+    }
+
+    const systemPromptTemplate = cachedSystemPrompt;
 
     if (mode === 'suggestions' && dynamicData) {
       const suggestions = await generateSuggestionsOnServer(

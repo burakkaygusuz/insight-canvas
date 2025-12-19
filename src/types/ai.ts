@@ -8,6 +8,11 @@ export interface ApiConfig {
   baseUrl?: string;
 }
 
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 export type DatasetRow = Record<string, string | number | boolean | null>;
 
 export interface DynamicData {

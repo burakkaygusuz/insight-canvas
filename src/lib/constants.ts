@@ -13,12 +13,14 @@ export const CHART_COLORS = [
 export enum AiProvider {
   GOOGLE = 'GOOGLE',
   OPENAI = 'OPENAI',
+  ANTHROPIC = 'ANTHROPIC',
   OPENAI_COMPATIBLE = 'OPENAI_COMPATIBLE'
 }
 
 export const PROVIDER_LABELS = {
   [AiProvider.GOOGLE]: 'Google Gemini',
   [AiProvider.OPENAI]: 'OpenAI',
+  [AiProvider.ANTHROPIC]: 'Anthropic (Claude)',
   [AiProvider.OPENAI_COMPATIBLE]: 'OpenAI Compatible'
 };
 
@@ -27,3 +29,5 @@ export const PROVIDER_LABELS = {
   and maintain high accuracy for reasoning.
 */
 export const MAX_ROWS_FOR_AI = 500;
+
+export const MAX_FILE_SIZE_MB = 5;

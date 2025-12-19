@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 
 import { MAX_ROWS_FOR_AI } from '@/lib/constants';
 import { GeneratedChartSchema, safeValidate } from '@/lib/validation';
-import { ApiConfig, ChartGenerator, DynamicData, GeneratedChart } from '@/types/ai';
+import { ApiConfig, ChartGenerator, ChatMessage, DynamicData, GeneratedChart } from '@/types/ai';
 
 const REQUEST_TIMEOUT_MS = 60000;
 
@@ -133,14 +133,17 @@ export class GoogleGemini implements ChartGenerator {
   }
 }
 
-export class OpenAi implements ChartGenerator {
+abstract class BaseOpenAiProvider implements ChartGenerator {
+  protected abstract getBaseUrl(config: ApiConfig): string;
+  protected abstract getProviderName(): string;
+
   async generate(
     prompt: string,
     systemPromptTemplate: string,
     config: ApiConfig,
     dynamicData?: DynamicData
   ): Promise<GeneratedChart> {
-    if (!config.apiKey) throw new Error('OpenAI API Key is required');
+    if (!config.apiKey) throw new Error(`${this.getProviderName()} API Key is required`);
     if (!dynamicData) throw new Error('Please upload a dataset first');
 
     const schema = dynamicData.schema;
@@ -150,38 +153,13 @@ export class OpenAi implements ChartGenerator {
       .replace('{{SCHEMA}}', schema)
       .replace('{{DATASET}}', JSON.stringify(dataset));
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const messages: ChatMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: prompt }
+    ];
 
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.apiKey}`
-        },
-        body: JSON.stringify({
-          model: config.model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ],
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal
-      });
-
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`OpenAI API Error: ${response.status} - ${err}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      return parseAndValidateChart(content);
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    const content = await this.performRequest(config, messages);
+    return parseAndValidateChart(content);
   }
 
   async generateSuggestions(
@@ -189,7 +167,7 @@ export class OpenAi implements ChartGenerator {
     config: ApiConfig,
     dynamicData: DynamicData
   ): Promise<string[]> {
-    if (!config.apiKey) throw new Error('OpenAI API Key is required');
+    if (!config.apiKey) throw new Error(`${this.getProviderName()} API Key is required`);
 
     const dataset = dynamicData.dataset.slice(0, MAX_ROWS_FOR_AI);
     const prompt = `
@@ -204,8 +182,27 @@ export class OpenAi implements ChartGenerator {
       ${JSON.stringify(dataset)}
     `;
 
+    const messages: ChatMessage[] = [{ role: 'user', content: prompt }];
+
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const content = await this.performRequest(config, messages);
+      const parsed = tryParseJson(content) as { suggestions?: string[] };
+      return parsed.suggestions || [];
+    } catch (error) {
+      console.error('Suggestion generation failed:', error);
+      return [];
+    }
+  }
+
+  private async performRequest(config: ApiConfig, messages: ChatMessage[]): Promise<string> {
+    const baseUrl = this.getBaseUrl(config).replace(/\/$/, '');
+    const url = `${baseUrl}/chat/completions`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -213,120 +210,41 @@ export class OpenAi implements ChartGenerator {
         },
         body: JSON.stringify({
           model: config.model,
-          messages: [{ role: 'user', content: prompt }],
+          messages: messages,
           response_format: { type: 'json_object' }
-        })
+        }),
+        signal: controller.signal
       });
 
-      if (!response.ok) return [];
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`${this.getProviderName()} API Error: ${response.status} - ${err}`);
+      }
 
       const data = await response.json();
-      const content = data.choices[0].message.content;
-      const parsed = tryParseJson(content) as { suggestions?: string[] };
-      return parsed.suggestions || [];
-    } catch (error) {
-      console.error('Suggestion generation failed:', error);
-      return [];
+      return data.choices[0].message.content;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 }
 
-export class OpenAiCompatible implements ChartGenerator {
-  async generate(
-    prompt: string,
-    systemPromptTemplate: string,
-    config: ApiConfig,
-    dynamicData?: DynamicData
-  ): Promise<GeneratedChart> {
-    const baseUrl = config.baseUrl!;
-    if (!dynamicData) throw new Error('Please upload a dataset first');
-
-    const schema = dynamicData.schema;
-    const dataset = dynamicData.dataset.slice(0, MAX_ROWS_FOR_AI);
-
-    const systemPrompt = systemPromptTemplate
-      .replace('{{SCHEMA}}', schema)
-      .replace('{{DATASET}}', JSON.stringify(dataset));
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.apiKey!}`
-    };
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-    try {
-      const response = await fetch(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          model: config.model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ],
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal
-      });
-
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`API Error: ${response.status} - ${err}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      return parseAndValidateChart(content);
-    } finally {
-      clearTimeout(timeoutId);
-    }
+export class OpenAi extends BaseOpenAiProvider {
+  protected getBaseUrl(_config: ApiConfig): string {
+    return 'https://api.openai.com/v1';
   }
 
-  async generateSuggestions(
-    systemPromptTemplate: string,
-    config: ApiConfig,
-    dynamicData: DynamicData
-  ): Promise<string[]> {
-    const baseUrl = config.baseUrl!;
-    const dataset = dynamicData.dataset.slice(0, MAX_ROWS_FOR_AI);
+  protected getProviderName(): string {
+    return 'OpenAI';
+  }
+}
 
-    const prompt = `
-      Analyze the following dataset schema and data sample.
-      Generate 3 insightful questions that a user could ask to create meaningful charts/visualizations from this data.
-      Return the result as a JSON object with a "suggestions" key containing an array of strings.
-      
-      Schema:
-      ${dynamicData.schema}
-      
-      Data Sample:
-      ${JSON.stringify(dataset)}
-    `;
+export class OpenAiCompatible extends BaseOpenAiProvider {
+  protected getBaseUrl(config: ApiConfig): string {
+    return config.baseUrl || '';
+  }
 
-    try {
-      const response = await fetch(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.apiKey!}`
-        },
-        body: JSON.stringify({
-          model: config.model,
-          messages: [{ role: 'user', content: prompt }],
-          response_format: { type: 'json_object' }
-        })
-      });
-
-      if (!response.ok) return [];
-
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      const parsed = tryParseJson(content) as { suggestions?: string[] };
-      return parsed.suggestions || [];
-    } catch (error) {
-      console.error('Suggestion generation failed:', error);
-      return [];
-    }
+  protected getProviderName(): string {
+    return 'API';
   }
 }

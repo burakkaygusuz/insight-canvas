@@ -88,14 +88,36 @@ function generateSchemaFromData(data: DatasetRow[]): string {
   if (!data || data.length === 0) return '';
 
   const firstRow = data[0];
-  const schemaLines = ['Dataset Schema:'];
+  const schemaParts: string[] = [];
 
   Object.entries(firstRow).forEach(([key, value]) => {
     const type = typeof value;
-    schemaLines.push(`- ${key}: ${type}`);
+    schemaParts.push(`${key} (${type})`);
   });
 
-  return schemaLines.join('\n');
+  return `Columns: ${schemaParts.join(', ')}`;
+}
+
+export function datasetToCsv(data: DatasetRow[]): string {
+  if (!data || data.length === 0) return '';
+  const keys = Object.keys(data[0]);
+  const header = keys.join(',');
+  const rows = data.map((row) =>
+    keys
+      .map((key) => {
+        const val = row[key];
+        // Handle strings with commas or quotes
+        if (
+          typeof val === 'string' &&
+          (val.includes(',') || val.includes('"') || val.includes('\n'))
+        ) {
+          return `"${val.replaceAll('"', '""')}"`;
+        }
+        return String(val ?? '');
+      })
+      .join(',')
+  );
+  return [header, ...rows].join('\n');
 }
 
 export function getSampleData(data: DatasetRow[], limit: number = 5): DatasetRow[] {

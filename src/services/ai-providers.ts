@@ -1,4 +1,5 @@
 import { MAX_ROWS_FOR_AI } from '@/lib/constants';
+import { datasetToCsv } from '@/lib/data-utils';
 import { GeneratedChartSchema, safeValidate } from '@/lib/validation';
 import { ApiConfig, ChartGenerator, ChatMessage, DynamicData, GeneratedChart } from '@/types/ai';
 
@@ -68,7 +69,7 @@ export class GoogleGemini implements ChartGenerator {
 
     const systemPrompt = systemPromptTemplate
       .replace('{{SCHEMA}}', schema)
-      .replace('{{DATASET}}', JSON.stringify(dataset))
+      .replace('{{DATASET}}', datasetToCsv(dataset))
       .replace('{{MAX_ROWS}}', MAX_ROWS_FOR_AI.toString());
 
     const content = await this.performRequest(config, systemPrompt, prompt);
@@ -185,7 +186,7 @@ abstract class BaseOpenAiProvider implements ChartGenerator {
 
     const systemPrompt = systemPromptTemplate
       .replace('{{SCHEMA}}', schema)
-      .replace('{{DATASET}}', JSON.stringify(dataset))
+      .replace('{{DATASET}}', datasetToCsv(dataset))
       .replace('{{MAX_ROWS}}', MAX_ROWS_FOR_AI.toString());
 
     const messages: ChatMessage[] = [
@@ -302,7 +303,7 @@ export class Anthropic implements ChartGenerator {
 
     const systemPrompt = systemPromptTemplate
       .replace('{{SCHEMA}}', schema)
-      .replace('{{DATASET}}', JSON.stringify(dataset))
+      .replace('{{DATASET}}', datasetToCsv(dataset))
       .replace('{{MAX_ROWS}}', MAX_ROWS_FOR_AI.toString());
 
     const content = await this.performRequest(config, systemPrompt, prompt);

@@ -5,9 +5,11 @@ You are an expert data visualization assistant. Your task is to analyze the prov
 # Input Data
 
 Schema:
+
 {{SCHEMA}}
 
-Dataset Sample (Top {{MAX_ROWS}} rows):
+Dataset Sample (CSV format, Top {{MAX_ROWS}} rows):
+
 {{DATASET}}
 
 # Output Schema

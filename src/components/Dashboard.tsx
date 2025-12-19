@@ -20,6 +20,7 @@ import { SettingsModal } from '@/components/SettingsModal';
 import { useLocalStorage } from '@/hooks/local-storage';
 import { AiProvider } from '@/lib/constants';
 import { FileData, parseFile } from '@/lib/data-utils';
+import { FileSchema, safeValidate } from '@/lib/validation';
 import { generateChartFromPrompt, generateSuggestions } from '@/services/ai-client';
 import { ApiConfig, GeneratedChart } from '@/types/ai';
 
@@ -83,6 +84,12 @@ export default function Dashboard() {
     setError(null);
 
     try {
+      // Validate file size and type
+      const validation = await safeValidate(FileSchema, file);
+      if (!validation.success) {
+        throw new Error(validation.error);
+      }
+
       const parsed = await parseFile(file);
 
       setDynamicData(parsed);

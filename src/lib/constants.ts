@@ -29,3 +29,5 @@ export const PROVIDER_LABELS = {
   and maintain high accuracy for reasoning.
 */
 export const MAX_ROWS_FOR_AI = 500;
+
+export const MAX_FILE_SIZE_MB = 5;

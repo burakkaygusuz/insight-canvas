@@ -1,3 +1,4 @@
+import { redactData } from '@/lib/privacy';
 import { DatasetRow } from '@/types/ai';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
@@ -20,12 +21,13 @@ export async function parseFile(file: File): Promise<FileData> {
         skipEmptyLines: true,
         worker: false,
         complete: (results) => {
-          const data = results.data as DatasetRow[];
+          const rawData = results.data as DatasetRow[];
+          const redactedData = redactData(rawData);
           resolve({
-            schema: generateSchemaFromData(data),
-            dataset: data,
+            schema: generateSchemaFromData(redactedData),
+            dataset: redactedData,
             fileName: file.name,
-            suggestions: generateSuggestions(data)
+            suggestions: generateSuggestions(redactedData)
           });
         },
         error: (error: unknown) => reject(error)
@@ -37,11 +39,12 @@ export async function parseFile(file: File): Promise<FileData> {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const json = XLSX.utils.sheet_to_json<DatasetRow>(worksheet);
+    const redactedData = redactData(json);
     return {
-      schema: generateSchemaFromData(json),
-      dataset: json,
+      schema: generateSchemaFromData(redactedData),
+      dataset: redactedData,
       fileName: file.name,
-      suggestions: generateSuggestions(json)
+      suggestions: generateSuggestions(redactedData)
     };
   } else {
     throw new Error('Unsupported file format. Please upload CSV or Excel.');

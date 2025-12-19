@@ -10,10 +10,17 @@ let cachedSystemPrompt: string | null = null;
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { prompt, config, dynamicData, mode } = body;
+    const { prompt, config: bodyConfig, dynamicData, mode } = body;
+    const apiKey = request.headers.get('x-ai-api-key');
 
-    if (!config) {
+    if (!bodyConfig) {
       return NextResponse.json({ error: 'Missing config' }, { status: 400 });
+    }
+
+    const config = { ...bodyConfig, apiKey: apiKey || bodyConfig.apiKey } as ApiConfig;
+
+    if (!config.apiKey) {
+      return NextResponse.json({ error: 'Missing API Key' }, { status: 401 });
     }
 
     if (!cachedSystemPrompt) {

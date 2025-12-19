@@ -1,9 +1,5 @@
 export type ChartType = 'BAR' | 'LINE' | 'AREA' | 'PIE';
 
-export interface ChartDataPoint {
-  [key: string]: string | number;
-}
-
 export interface GeneratedChart {
   id?: string;
   title: string;
@@ -11,5 +7,5 @@ export interface GeneratedChart {
   type: ChartType;
   xAxisKey: string;
   dataKey: string;
-  data: ChartDataPoint[];
+  data: (string | number)[][];
 }

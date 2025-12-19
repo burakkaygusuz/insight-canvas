@@ -24,10 +24,7 @@ Return ONLY a valid JSON object matching this structure. Do not include markdown
   "xAxisKey": "string (column name for X-axis)",
   "dataKey": "string (column name for Y-axis values)",
   "data": [
-    {
-      "<xAxisKey>": "string | number",
-      "<dataKey>": "number"
-    }
+    ["string | number (X-axis value)", "number (Y-axis value)"]
   ]
 }
 ```
@@ -37,7 +34,7 @@ Return ONLY a valid JSON object matching this structure. Do not include markdown
 1. **Aggregation**: If the user asks for "total" or "average", aggregate the data yourself in the `data` array.
 2. **Filtering**: Include only relevant data points.
 3. **Sorting**: Sort data logically (e.g., by date or descending value).
-4. **Data Types**: `dataKey` values MUST be numbers. `xAxisKey` matches the field name in `data`.
+4. **Data Format**: `data` MUST be an array of arrays (tuples). Index 0 corresponds to `xAxisKey`, Index 1 corresponds to `dataKey` (must be a number).
 5. **Constraints**: `data` array must have at least 1 item. Max 50 items for Pie charts, max 500 for others.
 
 # Example
@@ -51,7 +48,7 @@ Output:
 "xAxisKey": "region",
 "dataKey": "sales",
 "data": [
-{ "region": "North", "sales": 5000 },
-{ "region": "South", "sales": 7500 }
+["North", 5000],
+["South", 7500]
 ]
 }

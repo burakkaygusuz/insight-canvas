@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   Area,
   AreaChart,
@@ -30,11 +30,18 @@ interface ChartRendererProps {
 export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<ChartRendererProps>) {
   const { type, data, xAxisKey, dataKey } = chart;
 
+  const formattedData = useMemo(() => {
+    return data.map((row) => ({
+      [xAxisKey]: row[0],
+      [dataKey]: row[1]
+    }));
+  }, [data, xAxisKey, dataKey]);
+
   const renderChart = () => {
     switch (type) {
       case 'BAR':
         return (
-          <BarChart data={data}>
+          <BarChart data={formattedData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
             <XAxis
               dataKey={xAxisKey}
@@ -71,7 +78,7 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
         );
       case 'LINE':
         return (
-          <LineChart data={data}>
+          <LineChart data={formattedData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
             <XAxis
               dataKey={xAxisKey}
@@ -114,7 +121,7 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
         );
       case 'AREA':
         return (
-          <AreaChart data={data}>
+          <AreaChart data={formattedData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
             <XAxis
               dataKey={xAxisKey}
@@ -159,7 +166,7 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
         return (
           <PieChart>
             <Pie
-              data={data}
+              data={formattedData}
               dataKey={dataKey}
               nameKey={xAxisKey}
               cx="50%"
@@ -168,7 +175,7 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
               fill="var(--primary)"
               label
             >
-              {data.map((entry, index) => (
+              {formattedData.map((entry, index) => (
                 <Cell
                   key={`cell-${String(entry[xAxisKey] ?? index)}`}
                   fill={CHART_COLORS[index % CHART_COLORS.length]}

@@ -70,8 +70,6 @@ export const UserQuerySchema = z
     message: 'Please describe the chart you would like to create.'
   });
 
-export const ChartDataPointSchema = z.record(z.string(), z.union([z.string(), z.number()]));
-
 export const GeneratedChartSchema = z
   .object({
     title: z
@@ -90,33 +88,29 @@ export const GeneratedChartSchema = z
       .string({ message: 'Data key is required' })
       .min(1, { message: 'Data key cannot be empty' }),
     data: z
-      .array(ChartDataPointSchema)
+      .array(z.array(z.union([z.string(), z.number()])))
       .min(1, { message: 'Chart must have at least one data point' })
       .max(2000, { message: 'Too many data points (max 2000 for performance)' })
   })
   .refine(
     (chart) => {
-      return chart.data.every(
-        (point) => point[chart.xAxisKey] !== undefined && point[chart.dataKey] !== undefined
-      );
+      return chart.data.every((row) => row.length >= 2);
     },
     {
-      message: 'All data points must contain both xAxisKey and dataKey fields'
+      message: 'Data points must be arrays with at least 2 elements (X and Y values).'
     }
   )
   .refine(
     (chart) => {
-      return chart.data.every((point) => typeof point[chart.dataKey] === 'number');
+      return chart.data.every((row) => typeof row[1] === 'number');
     },
     {
-      message: 'All dataKey values must be numbers for proper chart rendering'
+      message: 'The second element in each data point (value) must be a number.'
     }
   );
 
 export type UserQueryInput = z.input<typeof UserQuerySchema>;
 export type UserQueryOutput = z.output<typeof UserQuerySchema>;
-export type ChartDataPointInput = z.input<typeof ChartDataPointSchema>;
-export type ChartDataPointOutput = z.output<typeof ChartDataPointSchema>;
 export type GeneratedChartInput = z.input<typeof GeneratedChartSchema>;
 export type GeneratedChartOutput = z.output<typeof GeneratedChartSchema>;
 

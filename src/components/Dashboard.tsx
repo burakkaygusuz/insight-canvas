@@ -283,12 +283,12 @@ export default function Dashboard() {
                         description: 'Revenue is trending up by 20% month-over-month.',
                         type: 'AREA',
                         data: [
-                          { month: 'Jan', value: 4000 },
-                          { month: 'Feb', value: 3000 },
-                          { month: 'Mar', value: 5000 },
-                          { month: 'Apr', value: 7000 },
-                          { month: 'May', value: 6000 },
-                          { month: 'Jun', value: 9000 }
+                          ['Jan', 4000],
+                          ['Feb', 3000],
+                          ['Mar', 5000],
+                          ['Apr', 7000],
+                          ['May', 6000],
+                          ['Jun', 9000]
                         ],
                         xAxisKey: 'month',
                         dataKey: 'value'

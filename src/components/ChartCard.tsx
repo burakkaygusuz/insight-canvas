@@ -42,8 +42,11 @@ export const ChartCard = memo(function ChartCard({ chart, onDelete }: Readonly<C
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
     >
-      <Card className="hover:border-primary/20 hover:bg-card/70 flex h-full min-h-[350px] w-full flex-col shadow-md transition-all duration-300 hover:shadow-xl">
-        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+      <Card
+        variant="glass"
+        className="hover:bg-card/70 flex h-full min-h-[350px] w-full flex-col hover:shadow-xl"
+      >
+        <CardHeader className="flex-row items-start justify-between space-y-0 pb-2">
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}

@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { AlertCircle, Settings } from 'lucide-react';
+import * as m from 'motion/react-m';
 import { memo, useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
@@ -107,16 +107,16 @@ export const SettingsModal = memo(function SettingsModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <motion.div whileHover={{ scale: 1.05, rotate: 90 }} whileTap={{ scale: 0.95 }}>
+          <m.div whileHover={{ scale: 1.05, rotate: 90 }} whileTap={{ scale: 0.95 }}>
             <Button variant="outline" size="icon" className="rounded-full">
               <Settings className="text-muted-foreground h-5 w-5" />
               <span className="sr-only">Settings</span>
             </Button>
-          </motion.div>
+          </m.div>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
@@ -127,9 +127,9 @@ export const SettingsModal = memo(function SettingsModal({
               Configure your AI provider, API key, and model preferences.
             </DialogDescription>
           </DialogHeader>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.3 }}
@@ -154,7 +154,7 @@ export const SettingsModal = memo(function SettingsModal({
               </Select>
             </div>
           </div>
-          <motion.div
+          <m.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             className="grid grid-cols-4 items-center gap-4"
@@ -173,9 +173,9 @@ export const SettingsModal = memo(function SettingsModal({
               className="col-span-3"
               placeholder={provider === AiProvider.GOOGLE ? 'Enter API Key...' : 'sk-...'}
             />
-          </motion.div>
+          </m.div>
           {provider === AiProvider.OPENAI_COMPATIBLE && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="grid grid-cols-4 items-center gap-4"
@@ -193,7 +193,7 @@ export const SettingsModal = memo(function SettingsModal({
                 className="col-span-3"
                 placeholder="https://api.groq.com/openai/v1"
               />
-            </motion.div>
+            </m.div>
           )}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="model" className="text-right">
@@ -211,32 +211,32 @@ export const SettingsModal = memo(function SettingsModal({
               />
             </div>
           </div>
-        </motion.div>
+        </m.div>
 
         {validationError && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
           >
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <p className="flex-1">{validationError}</p>
-          </motion.div>
+          </m.div>
         )}
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.3 }}
         >
           <DialogFooter>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <m.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button type="submit" onClick={handleSave} disabled={!hasChanges}>
                 Save changes
               </Button>
-            </motion.div>
+            </m.div>
           </DialogFooter>
-        </motion.div>
+        </m.div>
       </DialogContent>
     </Dialog>
   );

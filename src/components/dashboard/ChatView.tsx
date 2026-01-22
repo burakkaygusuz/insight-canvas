@@ -4,8 +4,9 @@ import { ChartCard } from '@/components/ChartCard';
 import { ChatForm } from '@/components/ChatForm';
 import { FileData } from '@/lib/data-utils';
 import { ApiConfig, GeneratedChart } from '@/types/ai';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Database, LayoutGrid, Loader2, X } from 'lucide-react';
+import { AnimatePresence } from 'motion/react';
+import * as m from 'motion/react-m';
 
 interface ChatViewProps {
   dynamicData: FileData | null;
@@ -44,7 +45,7 @@ export function ChatView({
   onDeleteChart
 }: Readonly<ChatViewProps>) {
   return (
-    <motion.div
+    <m.div
       key="chat"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -78,7 +79,7 @@ export function ChatView({
 
         <AnimatePresence>
           {loadingStep !== 'idle' && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -86,14 +87,14 @@ export function ChatView({
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="bg-border h-1.5 w-full max-w-xs overflow-hidden rounded-full">
-                  <motion.div
+                  <m.div
                     className="bg-primary h-full"
                     initial={{ width: '0%' }}
                     animate={{ width: PROGRESS_WIDTHS[loadingStep] }}
                     transition={{ duration: 0.5, ease: 'easeInOut' }}
                   />
                 </div>
-                <motion.span
+                <m.span
                   key={loadingStep}
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -103,9 +104,9 @@ export function ChatView({
                   {loadingStep === 'analyzing' && 'Analyzing data patterns...'}
                   {loadingStep === 'generating' && 'Crafting visualization...'}
                   {loadingStep === 'finalizing' && 'Polishing chart details...'}
-                </motion.span>
+                </m.span>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>
@@ -145,9 +146,9 @@ export function ChatView({
 
       <AnimatePresence mode="popLayout">
         {optimisticCharts.length > 0 ? (
-          <motion.div className="grid auto-rows-[minmax(400px,auto)] grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <m.div className="grid auto-rows-[minmax(400px,auto)] grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {optimisticCharts.map((chart, i) => (
-              <motion.div
+              <m.div
                 key={chart.id}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -156,11 +157,11 @@ export function ChatView({
                 className={i === 0 || i % 7 === 0 ? 'md:col-span-2 xl:col-span-2' : ''}
               >
                 <ChartCard chart={chart} onDelete={() => onDeleteChart(chart.id!)} />
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
         ) : (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="bg-card/20 text-muted-foreground relative flex h-96 flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-white/10 backdrop-blur-sm"
@@ -171,9 +172,9 @@ export function ChatView({
             </div>
             <p className="text-foreground text-lg font-medium">Ready to Visualize</p>
             <p className="text-sm opacity-60">Generate your first chart to build your dashboard.</p>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
   );
 }

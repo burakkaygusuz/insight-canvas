@@ -1,9 +1,5 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, X } from 'lucide-react';
-import { useCallback, useEffect, useOptimistic, useRef, useState } from 'react';
-
 import { generateSuggestionsAction } from '@/app/actions';
 import { ChatView } from '@/components/dashboard/ChatView';
 import { ConnectView } from '@/components/dashboard/ConnectView';
@@ -14,6 +10,10 @@ import { AiProvider } from '@/lib/constants';
 import { FileData, parseFile } from '@/lib/data-utils';
 import { FileSchema, safeValidate } from '@/lib/validation';
 import { ApiConfig, GeneratedChart } from '@/types/ai';
+import { AlertCircle, X } from 'lucide-react';
+import { AnimatePresence } from 'motion/react';
+import * as m from 'motion/react-m';
+import { useCallback, useEffect, useOptimistic, useRef, useState } from 'react';
 
 type DashboardState = 'connect' | 'upload' | 'chat';
 
@@ -167,7 +167,7 @@ export default function Dashboard() {
         {/* Global Error Toast */}
         <AnimatePresence>
           {error && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: 20, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 20, scale: 0.95 }}
@@ -184,7 +184,7 @@ export default function Dashboard() {
               >
                 <X size={16} />
               </button>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </PageContainer>

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import * as m from 'motion/react-m';
 import { memo, useMemo } from 'react';
 import {
   Area,
@@ -207,7 +207,7 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
   };
 
   return (
-    <motion.div
+    <m.div
       key={`${type}-${data.length}`}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -217,6 +217,6 @@ export const ChartRenderer = memo(function ChartRenderer({ chart }: Readonly<Cha
       <ResponsiveContainer width="100%" height="100%">
         {renderChart()}
       </ResponsiveContainer>
-    </motion.div>
+    </m.div>
   );
 });

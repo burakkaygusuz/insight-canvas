@@ -3,8 +3,8 @@
 import { ChartCard } from '@/components/ChartCard';
 import { SettingsModal } from '@/components/SettingsModal';
 import { ApiConfig } from '@/types/ai';
-import { motion } from 'framer-motion';
 import { ArrowRight, Key, Sparkles } from 'lucide-react';
+import * as m from 'motion/react-m';
 
 interface ConnectViewProps {
   config: ApiConfig;
@@ -13,7 +13,7 @@ interface ConnectViewProps {
 
 export function ConnectView({ config, onConfigSave }: Readonly<ConnectViewProps>) {
   return (
-    <motion.div
+    <m.div
       key="connect"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -63,7 +63,7 @@ export function ConnectView({ config, onConfigSave }: Readonly<ConnectViewProps>
         <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-purple-500/30 blur-[100px]" />
         <div className="bg-primary/30 absolute -bottom-20 -left-20 h-72 w-72 rounded-full blur-[100px]" />
 
-        <motion.div
+        <m.div
           initial={{ rotateX: 5, rotateY: -12, opacity: 0, y: 50 }}
           animate={{ rotateX: 5, rotateY: -12, opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -92,8 +92,8 @@ export function ConnectView({ config, onConfigSave }: Readonly<ConnectViewProps>
             />
           </div>
           <div className="pointer-events-none absolute inset-0 rounded-xl bg-linear-to-tr from-white/10 to-transparent opacity-50 mix-blend-overlay" />
-        </motion.div>
+        </m.div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }

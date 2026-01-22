@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { FileText, FileUp, Loader2 } from 'lucide-react';
+import * as m from 'motion/react-m';
 import { RefObject } from 'react';
 
 interface UploadViewProps {
@@ -18,7 +18,7 @@ export function UploadView({
   onSkipToDemo
 }: Readonly<UploadViewProps>) {
   return (
-    <motion.div
+    <m.div
       key="upload"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -67,6 +67,6 @@ export function UploadView({
           Skip to Demo Data
         </button>
       </div>
-    </motion.div>
+    </m.div>
   );
 }

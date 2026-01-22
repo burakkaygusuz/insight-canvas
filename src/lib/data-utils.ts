@@ -123,3 +123,22 @@ export function datasetToCsv(data: DatasetRow[]): string {
 export function getSampleData(data: DatasetRow[], limit: number = 5): DatasetRow[] {
   return data.slice(0, limit);
 }
+
+export const DEMO_DATA: FileData = {
+  fileName: 'demo_financials.csv',
+  schema: 'Columns: month (string), revenue (number), expenses (number), profit (number)',
+  dataset: [
+    { month: 'Jan', revenue: 4000, expenses: 2400, profit: 1600 },
+    { month: 'Feb', revenue: 3000, expenses: 1398, profit: 1602 },
+    { month: 'Mar', revenue: 2000, expenses: 9800, profit: -7800 },
+    { month: 'Apr', revenue: 2780, expenses: 3908, profit: -1128 },
+    { month: 'May', revenue: 1890, expenses: 4800, profit: -2910 },
+    { month: 'Jun', revenue: 2390, expenses: 3800, profit: -1410 },
+    { month: 'Jul', revenue: 3490, expenses: 4300, profit: -810 }
+  ],
+  suggestions: [
+    'Show revenue trend over time',
+    'Compare revenue vs expenses',
+    'Calculate total profit'
+  ]
+};

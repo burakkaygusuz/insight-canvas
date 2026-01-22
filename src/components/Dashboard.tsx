@@ -7,7 +7,7 @@ import { UploadView } from '@/components/dashboard/UploadView';
 import { BackgroundAmbience, DashboardHeader, PageContainer } from '@/components/layout/Shell';
 import { useLocalStorage } from '@/hooks/local-storage';
 import { AiProvider } from '@/lib/constants';
-import { FileData, parseFile } from '@/lib/data-utils';
+import { DEMO_DATA, FileData, parseFile } from '@/lib/data-utils';
 import { FileSchema, safeValidate } from '@/lib/validation';
 import { ApiConfig, GeneratedChart } from '@/types/ai';
 import { AlertCircle, X } from 'lucide-react';
@@ -139,7 +139,10 @@ export default function Dashboard() {
               isUploading={isUploading}
               fileInputRef={fileInputRef}
               onFileUpload={handleFileUpload}
-              onSkipToDemo={() => setAppState('chat')}
+              onSkipToDemo={() => {
+                setDynamicData(DEMO_DATA);
+                setAppState('chat');
+              }}
             />
           )}
 
